@@ -34,7 +34,7 @@ public class Move {
 	}
 
 	/** 
-	 * 
+	 * Could this be changed to just colour?
 	 * @param p piece to be promoted
 	 * @param t the type of piece to be promoted 
 	 * @param endpos the coordinates of the new promoted piece
@@ -62,5 +62,9 @@ public class Move {
 
 	public void setEndpos(byte endpos) {
 		this.endpos = endpos;
+	}
+	
+	public String toString(){
+		return "Start " + startpos + " End " + endpos;
 	}
 }
