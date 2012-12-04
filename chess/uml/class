@@ -1,0 +1,79 @@
+@startuml img/chess-class.png
+
+Class Game {
+- Player player1
+- Player player2
+- Board boardGame
++ run()
+}
+
+Class UI {
++ getInput()
++ printBoard()
+}
+
+Class Board {
++ byte[] board
++ tryMove()
++ makeMove()
++ undoMove()
++ generateMoves()
++ getBoardState()
+}
+
+Class Player {
+}
+
+Class Human {
+}
+
+Class Computer {
+Evaluator evaluator
++ bestMove()
+}
+
+Class Piece {
+- Type type
+- Colour colour
+- byte position
++ getFigurine()
++ getColour()
++ getPosition()
++ getPieceValue()
+}
+
+Enum Type {
+PAWN
+ROOK
+KNIGHT
+BISHOP
+QUEEN
+KING
++ getTypeValue()
+}
+
+Enum Colour {
+WHITE
+BLACK
+}
+
+Class Move {
+- byte start
+- byte end
++ getStartPosistion()
++ getFinishingPosistion()
++ getPromotion()
+}
+
+Game - UI
+Game -- Board
+Player - Game
+Player <|-- Human
+Player <|-- Computer
+Board *-- "*" Piece
+Board - Move
+Piece - Colour
+Type - Piece
+
+
+@enduml

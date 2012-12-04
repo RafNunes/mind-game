@@ -1,3 +1,5 @@
+package chess.piece;
+
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
@@ -7,7 +9,7 @@ import chess.piece.Piece.Type;
 
 //all tests are currently passed
 
-public class Piecetest {
+public class PieceTest {
 	@Test
 	//test for colour
 	public void Whitetest(){

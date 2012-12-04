@@ -1,0 +1,27 @@
+@startuml img/activity_img04.png
+(*) --> "View Board Position"
+    --> "Choose Square"
+    if "Is Valid Square?"
+        --> [Yes] "Choose Destination"
+    else
+        -->"View Board Position"
+    endif
+
+"Choose Destination" --> "Generate Move"
+    if "Is Valid Move"
+        --> [Yes] "Make Move"
+        if "Won"
+            --> [Yes] (*)
+    else
+        --> [No] "Wait for other player" 
+        if "Lose?"
+            --> [Yes] (*)
+        else
+            --> "View Board Position"
+        endif
+    endif
+else
+    -->[No] "Choose Destination"
+endif
+
+@enduml
