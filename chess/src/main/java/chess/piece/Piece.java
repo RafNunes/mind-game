@@ -5,6 +5,8 @@ package chess.piece;
  * @author Craig Martin
  * @version 0.1 - first piece representation
  * @since 03/12/12
+ * 
+ * This passes all tests defined in Piecetest.java
  */
 
 
@@ -22,16 +24,9 @@ public class Piece {
 	 *with reference to (Capablanca & de Firmian 2006:24–25), (Soltis 2004:6), (Silman 1998:340), (Polgar & Truong 2005:11)
 	 */
 	public enum Type{
-		PAWN(1), KNIGHT(3), BISHOP(3), ROOK(5), QUEEN(9), KING(Integer.MAX_VALUE);
-		private int value;
+		PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING;
 
-		private Type(int value) {
-			this.value = value;
-		}
 
-		public int getVal(){
-			return this.value;
-		}
 	}
 
 	// Variables needed
@@ -79,13 +74,12 @@ public class Piece {
 	public Type getType() {
 		return type;
 	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public int getValue(){
-		return type.getVal();
+
+
+
+
+	public String toString(){
+		return "Piece Colour: " + colour.toString() + " type: " + type.toString() +  " pos: " + coordinates;
 	}
 
 }
