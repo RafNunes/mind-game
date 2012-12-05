@@ -15,4 +15,7 @@ public class Board {
 	public List<Piece> getBoardState() {
 		return null;
 	}
+	public void test(){
+		
+	}
 }
