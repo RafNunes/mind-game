@@ -23,16 +23,16 @@ public class Game {
 		Coord point2 = new Coord();
 		String s;
 		Scanner inputScanner = new Scanner(System.in);
-<<<<<<< HEAD
+
 		
 		String validRanks = "abcdefh";
 		int n = 0;
 		
 		//set player colours
-=======
+
 
 		// set player colours
->>>>>>> 25fd6f9d0b59eaa72a319b78bf002f1400b3346d
+
 		System.out.print("Player 1 choose colour: ");
 		s = inputScanner.next();
 
@@ -47,7 +47,7 @@ public class Game {
 			System.err.println("bad input");
 			System.exit(1);
 		}
-<<<<<<< HEAD
+
 				
 		while(true){
 			//check board for check(mate)/stalemate
@@ -106,28 +106,7 @@ public class Game {
 				System.err.print("Bad input, try again");
 				continue;
 			}
-=======
 
-		while (true) {
-			// check board for check(mate)/stalemate
-			// if checkmate/stalemate, end
-			// else if check, impose check rules
-			// check player turn
-			// if(user input is a single coordinate
-			// return content of that coordinate
-			// else if(user input follows the pattern (coordinate to coordinate)
-			// Check if this move is legal
-			// if so, perform the move
-			// iterate turn%2
-			// else, prompt user for different input
-			// else if(user input requests board
-			// board to string
-			// else if user input equals quit
-			// end
-			// else
-			// error, retry input
->>>>>>> 25fd6f9d0b59eaa72a319b78bf002f1400b3346d
 		}
-
 	}
 }
