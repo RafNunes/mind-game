@@ -6,7 +6,7 @@ import chess.util.Colour;
 
 
 
-public class Player {
+public/**abstract*/ class Player {
 	
 
 	
@@ -15,6 +15,12 @@ public class Player {
 	public Player(){
 		
 	}
+	
+	public /**abstract*/ void getPlayerType(){
+		
+	}
+		
+	
 	
 	
 	
