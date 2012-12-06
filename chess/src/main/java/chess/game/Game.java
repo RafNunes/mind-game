@@ -3,6 +3,7 @@ package chess.game;
 import java.util.Scanner;
 
 import chess.piece.Piece;
+import chess.util.*;
 
 public class Game {
 
@@ -37,11 +38,11 @@ public class Game {
 		s = inputScanner.next();
 
 		if (s.toLowerCase().equals("white")) {
-			players[0].c = Piece.Colour.WHITE;
-			players[1].c = Piece.Colour.BLACK;
+			players[0].c = Colour.WHITE;
+			players[1].c = Colour.BLACK;
 		} else if (s.toLowerCase().equals("black")) {
-			players[1].c = Piece.Colour.WHITE;
-			players[0].c = Piece.Colour.BLACK;
+			players[1].c = Colour.WHITE;
+			players[0].c = Colour.BLACK;
 			turn = 1;
 		} else {
 			System.err.println("bad input");

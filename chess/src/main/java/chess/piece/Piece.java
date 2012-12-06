@@ -1,5 +1,7 @@
 package chess.piece;
 
+import chess.util.Colour;
+
 
 /**
  * @author Craig Martin
@@ -10,13 +12,8 @@ package chess.piece;
  */
 
 
-public class Piece {
-	/**
-	 * Enum with storing the Colour. Can either be Black or White
-	 */
-	public enum Colour{
-		WHITE, BLACK
-	}
+abstract public class Piece {
+
 
 	/**
 	 *Enum storing the Piece type - Can either be Pawn, a knight, a bishop, a rook, a queen or a king
@@ -32,17 +29,17 @@ public class Piece {
 	// Variables needed
 	private final Colour colour;
 	private final Type type;
-	private byte coordinates;
+	private byte posistion;
 
 	/**
 	 * 
 	 * @param c - colour of the piece
 	 * @param p	- type of the piece
 	 */
-	public Piece(Colour c, Type t, byte coordinates) {
+	public Piece(Colour c, Type t, byte coordinate) {
 		this.colour = c;
 		this.type = t;
-		this.coordinates = coordinates;
+		this.posistion = coordinate;
 	}
 
 	/**
@@ -50,14 +47,14 @@ public class Piece {
 	 * @return coordinates
 	 */
 	public byte getCoordinates() {
-		return coordinates;
+		return posistion;
 	}
 	/**
 	 * sets the coordinates of this piece
 	 * @param coordinates
 	 */
 	public void setCoordinates(byte coordinates) {
-		this.coordinates = coordinates;
+		this.posistion = coordinates;
 	}
 	/**
 	 * Returns the colour of this piece
@@ -75,11 +72,12 @@ public class Piece {
 		return type;
 	}
 
-
-
-
+	/**
+	 * Simple to string method. Prints everything out nice
+	 * @return string
+	 */
 	public String toString(){
-		return "Piece Colour: " + colour.toString() + " type: " + type.toString() +  " pos: " + coordinates;
+		return "Piece Colour: " + colour.toString() + " type: " + type.toString() +  " pos: " + posistion;
 	}
 
 }
