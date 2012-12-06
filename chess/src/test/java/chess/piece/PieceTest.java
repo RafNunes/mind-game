@@ -13,7 +13,7 @@ public class PieceTest {
 	@Test
 	//test for colour
 	public void Whitetest(){
-		Piece p = new Piece(Colour.WHITE, Type.PAWN, (byte)0);
+		Piece p = new Piece(chess.util.Colour.WHITE, Type.PAWN, (byte)0);
 		assertEquals("Result", Colour.WHITE, p.getColour());	
 	}
 

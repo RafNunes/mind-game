@@ -23,8 +23,9 @@ public class Move {
 	 * setting the coordinates will not be done from here permanently 
 	 * @param p
 	 * @param promotion
+	 * @throws InvalidPiece 
 	 */
-	public Piece makeMove(Piece p,boolean promotion, Type t){
+	public Piece makeMove(Piece p,boolean promotion, Type t) throws InvalidPiece{
 		p.setCoordinates(endpos);
 		if (promotion){
 			p = promotion(p, t);
@@ -38,10 +39,25 @@ public class Move {
 	 * @param p piece to be promoted
 	 * @param t the type of piece to be promoted 
 	 * @param endpos the coordinates of the new promoted piece
+	 * @throws InvalidPiece 
+	 * Returns null if something goes wrong
 	 */
-	private Piece promotion(Piece p, Type t) {
-		Piece d = new Piece(p.getColour(),t,endpos);
-		return d;
+	private Piece promotion(Piece p, Type t) throws InvalidPiece {
+		switch(t){
+		case KNIGHT: 
+			OnePiece k = new OnePiece(p.getColour(),t,p.getCoordinates());
+			return k;
+		case QUEEN:
+			Slidingpiece q = new Slidingpiece(p.getColour(),t,p.getCoordinates());
+			return q;
+		case BISHOP:
+			Slidingpiece b = new Slidingpiece(p.getColour(),t,p.getCoordinates());
+			return b;
+		case ROOK:
+			Slidingpiece r = new Slidingpiece(p.getColour(),t,p.getCoordinates());
+			return r;
+		}
+		return null;
 	}
 
 	
