@@ -19,8 +19,7 @@ public class OnePiece extends NonPawn{
 	
 	public OnePiece(Colour c, Type t, byte position) throws InvalidPiece {
 		super(c, t, position);
-		if (t != Type.KING || t!= Type.KNIGHT){
-			//invalid piece
+		if (!(t == Type.KING || t== Type.KNIGHT)){
 			throw new InvalidPiece("OnePiece must have type of either King or Knight");
 		}
 	}
@@ -31,8 +30,7 @@ public class OnePiece extends NonPawn{
 		Type type = this.getType();
 		switch(type){
 		case KNIGHT:	return KnightDir;
-		case KING:		return KingDir;
+		default:		return KingDir;
 		}
-		return null;
 	}
 }

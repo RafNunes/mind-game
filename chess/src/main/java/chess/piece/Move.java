@@ -48,13 +48,13 @@ public class Move {
 			OnePiece k = new OnePiece(p.getColour(),t,p.getCoordinates());
 			return k;
 		case QUEEN:
-			Slidingpiece q = new Slidingpiece(p.getColour(),t,p.getCoordinates());
+			SlidingPiece q = new SlidingPiece(p.getColour(),t,p.getCoordinates());
 			return q;
 		case BISHOP:
-			Slidingpiece b = new Slidingpiece(p.getColour(),t,p.getCoordinates());
+			SlidingPiece b = new SlidingPiece(p.getColour(),t,p.getCoordinates());
 			return b;
 		case ROOK:
-			Slidingpiece r = new Slidingpiece(p.getColour(),t,p.getCoordinates());
+			SlidingPiece r = new SlidingPiece(p.getColour(),t,p.getCoordinates());
 			return r;
 		}
 		return null;
