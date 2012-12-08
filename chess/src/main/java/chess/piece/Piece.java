@@ -17,44 +17,41 @@ abstract public class Piece {
 
 	/**
 	 *Enum storing the Piece type - Can either be Pawn, a knight, a bishop, a rook, a queen or a king
-	 *The pieces are assigned values relative to their class - these values are taken from http://en.wikipedia.org/wiki/Chess_piece_relative_value
-	 *with reference to (Capablanca & de Firmian 2006:24–25), (Soltis 2004:6), (Silman 1998:340), (Polgar & Truong 2005:11)
 	 */
 	public enum Type{
-		PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING;
-
-
+		PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING, NULL;
 	}
 
 	// Variables needed
 	private final Colour colour;
 	private final Type type;
-	private byte posistion;
+	private byte position;
 
 	/**
 	 * 
 	 * @param c - colour of the piece
 	 * @param p	- type of the piece
+	 * @param position - position in 0x88 array
 	 */
-	public Piece(Colour c, Type t, byte coordinate) {
+	public Piece(Colour c, Type t, byte position) {
 		this.colour = c;
 		this.type = t;
-		this.posistion = coordinate;
+		this.position = position;
 	}
 
 	/**
-	 * Get coordinates of this piece
-	 * @return coordinates
+	 * Get position of this piece
+	 * @return position
 	 */
-	public byte getCoordinates() {
-		return posistion;
+	public byte Position() {
+		return position;
 	}
 	/**
-	 * sets the coordinates of this piece
-	 * @param coordinates
+	 * sets the position of this piece
+	 * @param position
 	 */
-	public void setCoordinates(byte coordinates) {
-		this.posistion = coordinates;
+	public void setPosition(byte position) {
+		this.position = position;
 	}
 	/**
 	 * Returns the colour of this piece
@@ -77,7 +74,7 @@ abstract public class Piece {
 	 * @return string
 	 */
 	public String toString(){
-		return "Piece Colour: " + colour.toString() + " type: " + type.toString() +  " pos: " + posistion;
+		return "Piece Colour: " + colour.toString() + " type: " + type.toString() +  " pos: " + position;
 	}
 
 }

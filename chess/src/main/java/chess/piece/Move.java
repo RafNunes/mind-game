@@ -4,7 +4,7 @@ import chess.piece.Piece.Type;
 
 /**
  * 
- * @author Craig Martin
+ * @author Craig Martin, Demian Till
  * @version 0.1 - first move representation
  * @since 03/12/12
  */
@@ -12,53 +12,46 @@ import chess.piece.Piece.Type;
 public class Move {
 	private byte startpos;
 	private byte endpos;
+	private Piece.Type promotion;
+	private Piece capture;
 
 	public Move(byte start, byte end){
 		this.startpos = start;
 		this.endpos = end;
 	}
 	
-	/**
-	 * Current test method, used for updating the coordinates and activating the promotion method
-	 * setting the coordinates will not be done from here permanently 
-	 * @param p
-	 * @param promotion
-	 * @throws InvalidPiece 
-	 */
-	public Piece makeMove(Piece p,boolean promotion, Type t) throws InvalidPiece{
-		p.setCoordinates(endpos);
-		if (promotion){
-			p = promotion(p, t);
-			
-		}
-		return p;
+	public Move(byte start, byte end, Piece.Type promotion){
+		this.startpos = start;
+		this.endpos = end;
+		this.promotion = promotion;
 	}
-
-	/** 
-	 * Could this be changed to just colour?
-	 * @param p piece to be promoted
-	 * @param t the type of piece to be promoted 
-	 * @param endpos the coordinates of the new promoted piece
-	 * @throws InvalidPiece 
-	 * Returns null if something goes wrong
-	 */
-	private Piece promotion(Piece p, Type t) throws InvalidPiece {
-		switch(t){
-		case KNIGHT: 
-			OnePiece k = new OnePiece(p.getColour(),t,p.getCoordinates());
-			return k;
-		case QUEEN:
-			SlidingPiece q = new SlidingPiece(p.getColour(),t,p.getCoordinates());
-			return q;
-		case BISHOP:
-			SlidingPiece b = new SlidingPiece(p.getColour(),t,p.getCoordinates());
-			return b;
-		case ROOK:
-			SlidingPiece r = new SlidingPiece(p.getColour(),t,p.getCoordinates());
-			return r;
-		}
-		return null;
+	
+	public Move(byte start, byte end, Piece capture){
+		this.startpos = start;
+		this.endpos = end;
+		this.capture = capture;
 	}
+	
+	public Move(byte start, byte end, Piece.Type promotion, Piece capture){
+		this.startpos = start;
+		this.endpos = end;
+	}
+	
+//	/**
+//	 * Current test method, used for updating the coordinates and activating the promotion method
+//	 * setting the coordinates will not be done from here permanently 
+//	 * @param p
+//	 * @param promotion
+//	 * @throws InvalidPiece 
+//	 */
+//	public Piece makeMove(Piece p,boolean promotion, Type t) throws InvalidPiece{
+//		p.setPosition(endpos);
+//		if (promotion){
+//			p = promotion(p, t);
+//			
+//		}
+//		return p;
+//	}
 
 	
 	//getters and setters
@@ -78,6 +71,26 @@ public class Move {
 
 	public void setEndpos(byte endpos) {
 		this.endpos = endpos;
+	}
+	
+	public Piece.Type getPromotion() {
+		
+		return promotion;
+	}
+	
+	public void setPromotion(Piece.Type promotion) {
+		
+		this.promotion = promotion;
+	}
+	
+	public Piece getCapture() {
+		
+		return capture;
+	}
+	
+	public void setCapture(Piece capture) {
+		
+		this.capture = capture;
 	}
 	
 	public String toString(){

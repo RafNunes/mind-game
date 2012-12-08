@@ -56,14 +56,14 @@ public class PieceTest {
 	@Test
 	//type test for Knight
 	public void Knighttest() throws InvalidPiece{
-		Piece p = new OnePiece(Colour.BLACK, Type.KNIGHT, (byte)0);
+		Piece p = new SteppingPiece(Colour.BLACK, Type.KNIGHT, (byte)0);
 		assertEquals("Result", Type.KNIGHT, p.getType());
 	}
 
 	@Test
 	//type test for King
 	public void Kingtest() throws InvalidPiece{
-		Piece p = new OnePiece(Colour.BLACK, Type.KING, (byte)0);
+		Piece p = new SteppingPiece(Colour.BLACK, Type.KING, (byte)0);
 		assertEquals("Result", Type.KING, p.getType());
 	}
 	@Test
@@ -71,7 +71,7 @@ public class PieceTest {
 	public void poscor() throws InvalidPiece{
 		int i = 1;
 		while (i <= 1000){
-			Piece p = new OnePiece(Colour.BLACK, Type.KING, (byte)i);
+			Piece p = new SteppingPiece(Colour.BLACK, Type.KING, (byte)i);
 			assertEquals("Result", (byte)i, p.getCoordinates());	
 			i++;
 		}
@@ -79,7 +79,7 @@ public class PieceTest {
 	@Test
 	//test for 0 coordinates
 	public void zerocor() throws InvalidPiece{
-		Piece p = new OnePiece(Colour.BLACK, Type.KING, (byte)0);
+		Piece p = new SteppingPiece(Colour.BLACK, Type.KING, (byte)0);
 		assertEquals("Result", (byte)0, p.getCoordinates());
 	}
 	@Test
@@ -87,7 +87,7 @@ public class PieceTest {
 	public void negacor() throws InvalidPiece{
 		int i = -1;
 		while (i >= -1000){
-			Piece p = new OnePiece(Colour.BLACK, Type.KING, (byte)i);
+			Piece p = new SteppingPiece(Colour.BLACK, Type.KING, (byte)i);
 			assertEquals("Result", (byte)i, p.getCoordinates());	
 			i--;
 		}
@@ -103,7 +103,7 @@ public class PieceTest {
 	@Test (expected = Exception.class)
 	//tests to make sure pieces can't be assigned to the wrong class for OnePieces
 	public void wrongOne() throws InvalidPiece{
-		Piece p = new OnePiece(Colour.BLACK, Type.ROOK, (byte)0);
+		Piece p = new SteppingPiece(Colour.BLACK, Type.ROOK, (byte)0);
 
 	}
 }

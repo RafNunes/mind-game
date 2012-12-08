@@ -5,7 +5,7 @@ import chess.util.Colour;
 /**
  * 
  * @author Jarana
- * Pawn class which extens Piece
+ * Pawn class which extends Piece
  * Gives directions for the move generator to work with
  *
  */
@@ -13,23 +13,24 @@ import chess.util.Colour;
 public class Pawn extends Piece{
 	
 	private boolean hasMoved;
-	private byte forward;
-	private byte[] capture;
+	private byte forwardDir;
+	private byte[] captureDirs;
 	
 	public Pawn(Colour colour, byte position) {
-		super(colour,Type.PAWN , position);
-		capture = new byte[2];
+		
+		super(colour, Type.PAWN, position);
 		hasMoved = false;
+		captureDirs = new byte[2];
 		if(colour == Colour.WHITE){
-			forward = (byte)16;
-			capture[0] = (byte)17;
-			capture[1] = (byte)15;
+			forwardDir = (byte)16;
+			captureDirs[0] = (byte)17;
+			captureDirs[1] = (byte)15;
 		}
 		
 		else{
-			forward = (byte)-16;
-			capture[0] = (byte)-17;
-			capture[1] = (byte)-15;
+			forwardDir = (byte)-16;
+			captureDirs[0] = (byte)-17;
+			captureDirs[1] = (byte)-15;
 		}
 	}
 	public void setHasMoved(){
@@ -38,11 +39,11 @@ public class Pawn extends Piece{
 	public boolean getHasMoved(){
 		return hasMoved;
 	}
-	public byte getForward(){
-		return forward;
+	public byte getForwardDir(){
+		return forwardDir;
 	}
-	public byte[] getCapture(){
-		return capture;
+	public byte[] getCaptureDirs(){
+		return captureDirs;
 	}
 	
 }
