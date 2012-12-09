@@ -24,6 +24,7 @@ abstract public class Piece {
 	private final Colour colour;
 	private final Type type;
 	private byte position;
+	private boolean hasMoved;
 
 	/**
 	 * 
@@ -38,15 +39,7 @@ abstract public class Piece {
 		this.colour = c;
 		this.type = t;
 		this.position = position;
-	}
-
-	/**
-	 * Get position of this piece
-	 * 
-	 * @return position
-	 */
-	public byte Position() {
-		return position;
+		this.hasMoved = false;
 	}
 
 	/**
@@ -83,6 +76,15 @@ abstract public class Piece {
 	 */
 	public Type getType() {
 		return type;
+	}
+
+	/**
+	 * Returns true if the piece has has moved durin its life time, false otherwise
+	 * 
+	 * @return hasMoved
+	 */
+	public boolean hasMoved() {
+		return this.hasMoved;
 	}
 
 	/**

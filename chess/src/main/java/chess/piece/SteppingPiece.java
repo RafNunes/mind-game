@@ -10,10 +10,7 @@ import chess.util.Colour;
 
 public class SteppingPiece extends NonPawn{
 
-	public SteppingPiece(Colour c, Type t, byte position) throws InvalidPiece {
+	public SteppingPiece(Colour c, Type t, byte position) {
 		super(c, t, position);
-		if (!(t == Type.KING || t== Type.KNIGHT)){
-			throw new InvalidPiece("OnePiece must have type of either King or Knight");
-		}
 	}
 }
