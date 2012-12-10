@@ -49,6 +49,7 @@ abstract public class Piece {
 	 */
 	public void setPosition(byte position) {
 		this.position = position;
+		this.hasMoved = true;
 	}
 
 	/**
@@ -85,6 +86,10 @@ abstract public class Piece {
 	 */
 	public boolean hasMoved() {
 		return this.hasMoved;
+	}
+	
+	public void setHasMoved(boolean hasMoved) {
+		this.hasMoved = hasMoved;
 	}
 
 	/**

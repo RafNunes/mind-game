@@ -1,6 +1,7 @@
 package chess.game;
 
 import java.util.List;
+import java.util.Stack;
 
 import chess.piece.*;
 import chess.util.*;
@@ -16,6 +17,7 @@ public class Board {
 											// is in the list of white's or black's pieces.
 	private Colour thisPlayer; // colour of player whose turn it is now
 	private Colour otherPlayer; // colour of player whose turn it is NOT now
+	private Stack<Move> previousMoves;
 	
 	public static void main(String[] args) {
 		
@@ -25,6 +27,9 @@ public class Board {
 
 	public Board() {
 		
+		thisPlayer = Colour.WHITE;
+		otherPlayer = Colour.BLACK;
+		previousMoves = new Stack<Move>();
 		whitesPieceList = new PieceList();
 		blacksPieceList = new PieceList();
 		Piece.Type[] list_pieces = {Piece.Type.ROOK,Piece.Type.KNIGHT,Piece.Type.BISHOP,Piece.Type.QUEEN,Piece.Type.KING,Piece.Type.BISHOP,Piece.Type.KNIGHT,Piece.Type.ROOK};
@@ -65,19 +70,95 @@ public class Board {
 			}
 			System.out.print('\n');
 		}
-		
-		thisPlayer = Colour.WHITE;
-		otherPlayer = Colour.BLACK;
 	}
 	
 	public void tryMove(Move m) {
 		
-		
+		if(boardArray[m.getEndpos()] != null) {
+			
+			boardArray[m.getEndpos()].detachSelfFromList();
+		}
+		boardArray[m.getEndpos()] = boardArray[m.getStartpos()];
+		boardArray[m.getStartpos()] = null;
+		boardArray[m.getEndpos()].getPiece().setPosition(m.getEndpos());
+		if(m.getPromotion() != null) {
+
+			if(m.getPromotion() == Piece.Type.QUEEN) {
+				
+				boardArray[m.getEndpos()].setPiece(new SlidingPiece(thisPlayer, Piece.Type.QUEEN, m.getEndpos()));
+			}
+			else {
+				
+				boardArray[m.getEndpos()].setPiece(new SteppingPiece(thisPlayer, Piece.Type.KNIGHT, m.getEndpos()));
+			}
+		}
+		if(boardArray[m.getEndpos()].getPiece().getType() == Piece.Type.KING) {
+			
+			// if left castle we must move the left rook
+			if(m.getStartpos() - m.getEndpos() == 2) {
+				
+				boardArray[m.getStartpos() - 1] = boardArray[m.getStartpos() - 4];
+				boardArray[m.getStartpos() - 4] = null;
+				boardArray[m.getStartpos() - 1].getPiece().setPosition((byte)(m.getStartpos() - 1));
+			}
+			// if left castle we must move the right rook
+			if(m.getStartpos() - m.getEndpos() == -2) {
+
+				boardArray[m.getStartpos() + 1] = boardArray[m.getStartpos() + 3];
+				boardArray[m.getStartpos() + 3] = null;
+				boardArray[m.getStartpos() + 1].getPiece().setPosition((byte)(m.getStartpos() + 1));
+			}
+		}
+
+		Colour temp = thisPlayer;
+		thisPlayer = otherPlayer;
+		otherPlayer = temp;
+		previousMoves.push(m);
 	}
 	
-	public void undoMove() {
+	public void undoMove() { // error: need to return piece to not having moved if they hadnt before this move
 		
+		Colour temp = thisPlayer;
+		thisPlayer = otherPlayer;
+		otherPlayer = temp;
+		Move m = previousMoves.pop();
+		boardArray[m.getStartpos()] = boardArray[m.getEndpos()];
+		boardArray[m.getStartpos()].getPiece().setPosition(m.getStartpos());
+		if(m.getCapture() != null) {
+			
+			boardArray[m.getEndpos()] = new PieceListNode(m.getCapture());
+			if(thisPlayer == Colour.WHITE) whitesPieceList.addNode(boardArray[m.getEndpos()]);
+			else blacksPieceList.addNode(boardArray[m.getEndpos()]);
+		}
+		else boardArray[m.getEndpos()] = null;
 		
+		if(m.getPromotion() != null) {
+			
+			boardArray[m.getStartpos()].setPiece(new Pawn(thisPlayer, m.getStartpos()));
+			boardArray[m.getStartpos()].getPiece().setHasMoved(true);
+		}
+		if(boardArray[m.getStartpos()].getPiece().getType() == Piece.Type.KING) {
+			
+			// if left castle we must move the left rook
+			if(m.getStartpos() - m.getEndpos() == 2) {
+				
+				boardArray[m.getStartpos()].getPiece().setHasMoved(false);
+				boardArray[m.getStartpos() - 4] = boardArray[m.getStartpos() - 1];
+				boardArray[m.getStartpos() - 1] = null;
+				boardArray[m.getStartpos() - 4].getPiece().setPosition((byte)(m.getStartpos() - 4));
+				boardArray[m.getStartpos() - 4].getPiece().setHasMoved(false);
+			}
+			
+			// if right castle we must move the left rook
+			if(m.getStartpos() - m.getEndpos() == -2) {
+
+				boardArray[m.getStartpos()].getPiece().setHasMoved(false);
+				boardArray[m.getStartpos() + 3] = boardArray[m.getStartpos() + 1];
+				boardArray[m.getStartpos() + 1] = null;
+				boardArray[m.getStartpos() + 3].getPiece().setPosition((byte)(m.getStartpos() + 3));
+				boardArray[m.getStartpos() + 3].getPiece().setHasMoved(false);
+			}
+		}
 	}
 	
 	private boolean inCheck(Colour player) {
@@ -223,22 +304,9 @@ public class Board {
 				
 				byte forwardMove = ((Pawn)piece).getForwardDir();
 				
-				if(!((Pawn)piece).hasMoved()) {
+				if(boardArray[piece.getPosition() + forwardMove] == null) {
 					
-					if(boardArray[piece.getPosition() + forwardMove] == null) {
-						
-						Move m = new Move(piece.getPosition(), (byte)(piece.getPosition() + forwardMove));
-						if(legal(m)) moves.add(m);
-						if(boardArray[piece.getPosition() + (2 * forwardMove)] == null) {
-							
-							m = new Move(piece.getPosition(), (byte)(piece.getPosition() + (2 * forwardMove)));
-							if(legal(m)) moves.add(m);
-						}
-					}
-				}
-				else if(((Pawn)piece).oneOffFinalRow()) {
-					
-					if(boardArray[piece.getPosition() + forwardMove] == null) {
+					if(((Pawn)piece).oneOffFinalRow()) {
 						
 						Move m = new Move(piece.getPosition(), (byte)(piece.getPosition() + forwardMove), Piece.Type.QUEEN);
 						if(legal(m)) { 
@@ -249,13 +317,19 @@ public class Board {
 							moves.add(m);
 						}
 					}
-				}
-				else {
-					
-					if(boardArray[piece.getPosition() + forwardMove] == null) {
+					else {
 						
 						Move m = new Move(piece.getPosition(), (byte)(piece.getPosition() + forwardMove));
 						if(legal(m)) moves.add(m);
+					}
+					
+					if(!((Pawn)piece).hasMoved()) {
+						
+						if(boardArray[piece.getPosition() + (2 * forwardMove)] == null) {
+							
+							Move m = new Move(piece.getPosition(), (byte)(piece.getPosition() + (2 * forwardMove)));
+							if(legal(m)) moves.add(m);
+						}
 					}
 				}
 				
@@ -265,8 +339,22 @@ public class Board {
 					if(((piece.getPosition() + move) & 0x88) != 0) break;
 					if((boardArray[piece.getPosition() + move] != null) && (boardArray[piece.getPosition() + move].getPiece().getColour() == otherPlayer)) {
 						
-						Move m = new Move(piece.getPosition(), (byte)(piece.getPosition() + move), boardArray[piece.getPosition() + move].getPiece());
-						if(legal(m)) moves.add(m);
+						if(((Pawn)piece).oneOffFinalRow()) {
+							
+							Move m = new Move(piece.getPosition(), (byte)(piece.getPosition() + forwardMove), Piece.Type.QUEEN, boardArray[piece.getPosition() + move].getPiece());
+							if(legal(m)) { 
+								
+								moves.add(m);
+								// it should also be legal for knight as well (no point in the others)
+								m = new Move(piece.getPosition(), (byte)(piece.getPosition() + forwardMove), Piece.Type.KNIGHT, boardArray[piece.getPosition() + move].getPiece());
+								moves.add(m);
+							}
+						}
+						else {
+							
+							Move m = new Move(piece.getPosition(), (byte)(piece.getPosition() + move), boardArray[piece.getPosition() + move].getPiece());
+							if(legal(m)) moves.add(m);
+						}
 					}
 				}
 			}

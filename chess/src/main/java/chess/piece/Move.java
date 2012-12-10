@@ -35,6 +35,8 @@ public class Move {
 	public Move(byte start, byte end, Piece.Type promotion, Piece capture){
 		this.startpos = start;
 		this.endpos = end;
+		this.promotion = promotion;
+		this.capture = capture;
 	}
 	
 //	/**
