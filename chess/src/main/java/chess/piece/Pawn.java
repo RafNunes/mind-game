@@ -12,11 +12,25 @@ import chess.util.Colour;
 
 public class Pawn extends Piece{
 	
+	private static final byte[] whiteCaptureDirs = new byte[]{(byte)15, (byte)17};
+	private static final byte[] blackCaptureDirs = new byte[]{(byte)-15, (byte)-17};
+	
 	private byte forwardDir;
 	private byte[] captureDirs;
 	private final byte startingPos;
 	
+	public static byte[] getCaptureDirs(Colour c) {
+		
+		switch(c) {
+		
+		case WHITE: return whiteCaptureDirs;
+		case BLACK: return blackCaptureDirs;
+		default: return null;
+		}
+	}
+	
 	public Pawn(Colour colour, byte position) {
+		
 		
 		super(colour, Type.PAWN, position);
 		captureDirs = new byte[2];

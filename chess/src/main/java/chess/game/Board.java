@@ -1,13 +1,11 @@
 package chess.game;
 
-import java.util.List;
 import java.util.Stack;
 
 import chess.piece.*;
 import chess.util.*;
 
 import java.util.LinkedList;
-import java.util.Iterator;
 
 public class Board {
 	
@@ -18,6 +16,8 @@ public class Board {
 	private Colour thisPlayer; // colour of player whose turn it is now
 	private Colour otherPlayer; // colour of player whose turn it is NOT now
 	private Stack<Move> previousMoves;
+	private byte whiteKingPos; // so we don't have to search to find kings every time we check for 'check'
+	private byte blackKingPos;
 	
 	public static void main(String[] args) {
 		
@@ -32,6 +32,8 @@ public class Board {
 		previousMoves = new Stack<Move>();
 		whitesPieceList = new PieceList();
 		blacksPieceList = new PieceList();
+		whiteKingPos = (byte)4;
+		blackKingPos = (byte)116;
 		Piece.Type[] list_pieces = {Piece.Type.ROOK,Piece.Type.KNIGHT,Piece.Type.BISHOP,Piece.Type.QUEEN,Piece.Type.KING,Piece.Type.BISHOP,Piece.Type.KNIGHT,Piece.Type.ROOK};
 
 		for(int i=0;i<8;i++){
@@ -62,7 +64,6 @@ public class Board {
 		}
 		
 		crappyPrint();
-		
 	}
 	
 	public void crappyPrint() {
@@ -99,6 +100,10 @@ public class Board {
 			}
 		}
 		if(boardArray[m.getEndpos()].getPiece().getType() == Piece.Type.KING) {
+			
+			// track king position
+			if(thisPlayer == Colour.WHITE) whiteKingPos = m.getEndpos();
+			else blackKingPos = m.getEndpos();
 			
 			// if left castle we must move the left rook
 			if(m.getStartpos() - m.getEndpos() == 2) {
@@ -151,6 +156,10 @@ public class Board {
 		}
 		if(boardArray[m.getStartpos()].getPiece().getType() == Piece.Type.KING) {
 			
+			// track king position
+			if(thisPlayer == Colour.WHITE) whiteKingPos = m.getStartpos();
+			else blackKingPos = m.getStartpos();
+			
 			// if left castle we must move the left rook
 			if(m.getStartpos() - m.getEndpos() == 2) {
 				
@@ -176,6 +185,93 @@ public class Board {
 	// returns true if king belonging to 'player' is in check.
 	private boolean inCheck(Colour player) {
 		
+		byte kingPos;
+		Colour enemy;
+		if(player == Colour.WHITE) {
+			
+			kingPos = whiteKingPos;
+			enemy = Colour.BLACK;
+		}
+		else {
+			
+			kingPos = blackKingPos;
+			enemy = Colour.WHITE;
+		}
+		
+		// check for attacking stepping pieces
+		for(byte dir : NonPawn.getKnightDir()) {
+			
+			if(((byte)(kingPos + dir) & 0x88) == 0) {
+				
+				if(boardArray[kingPos + dir] != null && boardArray[kingPos + dir].getPiece().getType() == Piece.Type.KNIGHT &&
+						boardArray[kingPos + dir].getPiece().getColour() == enemy) return true;
+			}
+		}
+		for(byte dir : NonPawn.getKingDir()) {
+			
+			if(((byte)(kingPos + dir) & 0x88) == 0) {
+				
+				if(boardArray[kingPos + dir] != null && boardArray[kingPos + dir].getPiece().getType() == Piece.Type.KING &&
+						boardArray[kingPos + dir].getPiece().getColour() == enemy) return true;
+			}
+		}
+		
+		// check for attacking sliding pieces
+		byte[][] dirSets = new byte[2][];
+		dirSets[0] = NonPawn.getRookDir();
+		dirSets[1] = NonPawn.getBishDir();
+		
+		for(int i = 0; i < 2; i++) {
+			
+			for(byte dir : dirSets[i]) {
+				
+				byte nextPosition = (byte)(kingPos + dir);
+				boolean finished = false;
+				while(!finished) {
+				
+					// test whether off the board
+					if((nextPosition & 0x88) != 0) {
+						
+						finished = true;
+					}
+					else {
+						
+						// test whether next square is occupied
+						if(boardArray[nextPosition] != null) {
+
+							// this code is disgusting, sorry
+							Piece.Type dangerType;
+							if(i == 0) dangerType = Piece.Type.ROOK;
+							else dangerType = Piece.Type.BISHOP;
+							
+							if((boardArray[nextPosition].getPiece().getColour() == otherPlayer) &&
+									(boardArray[nextPosition].getPiece().getType() == dangerType ||
+									boardArray[nextPosition].getPiece().getType() == Piece.Type.QUEEN)) return true;
+
+							finished = true;
+						}
+						else {
+
+							nextPosition = (byte)(nextPosition + dir);
+						}
+					}
+				}
+			}
+		}
+		
+		// check for attacking pawns
+		byte[] dirs = Pawn.getCaptureDirs(enemy);
+		for(byte dir : dirs) {
+			
+			byte newPosition = (byte)(kingPos - dir); // '-' because dir is from pawns perspective
+			if(((byte)(newPosition) & 0x88) == 0) {
+				
+				if(boardArray[newPosition] != null && boardArray[newPosition].getPiece().getType() == Piece.Type.PAWN &&
+						boardArray[newPosition].getPiece().getColour() == enemy) return true;
+			}
+		}
+		
+		// if we get here then the king is not in check
 		return false;
 	}
 	

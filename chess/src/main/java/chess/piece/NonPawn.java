@@ -24,6 +24,28 @@ abstract public class NonPawn extends Piece {
 	//Moves for the Queen:leftup, rightup, rightdown, leftdown,Up, Down, Left, Right, 
 	private static final byte[] queenDir = new byte[]{(byte)15,(byte)17,(byte)-15,(byte)-17,(byte)16,(byte)-16,(byte)-1,(byte)1};
 	private static final byte[] kingDir = new byte[]{(byte)15,(byte)17,(byte)-15,(byte)-17,(byte)16,(byte)-16,(byte)-1,(byte)1};
+	
+	public static byte[] getRookDir() {
+		
+		return rookDir;
+	}
+	public static byte[] getKnightDir() {
+		
+		return knightDir;
+	}
+	public static byte[] getBishDir() {
+
+		return bishDir;
+	}
+	public static byte[] getQueenDir() {
+
+		return queenDir;
+	}
+	public static byte[] getKingDir() {
+
+		return kingDir;
+	}
+
 			
 	/**
 	 * Creates a piece with these attributes
