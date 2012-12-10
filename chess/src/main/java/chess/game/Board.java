@@ -49,7 +49,6 @@ public class Board {
 				blacksPieceList.addPiece(new SteppingPiece(Colour.BLACK, list_pieces[i], (byte)(i+112)));
 			}
 		}
-			
 		
 		boardArray = new PieceListNode[120]; // no need for the last 8 cells which are off the board
 		for(int i = 0; i < boardArray.length; i++) {
@@ -62,7 +61,13 @@ public class Board {
 			boardArray[node.getPiece().getPosition()]=node;
 		}
 		
-		System.out.println("check each position in boardArray");
+		crappyPrint();
+		
+	}
+	
+	public void crappyPrint() {
+		
+		System.out.println();
 		for(int i=7;i>=0;i--) {
 			for(int j=0;j<8;j++){
 				if(boardArray[(i*16)+j] == null) System.out.print("Empty, ");
@@ -70,6 +75,7 @@ public class Board {
 			}
 			System.out.print('\n');
 		}
+		System.out.println();
 	}
 	
 	public void tryMove(Move m) {
@@ -116,7 +122,7 @@ public class Board {
 		previousMoves.push(m);
 	}
 	
-	public void undoMove() { // error: need to return piece to not having moved if they hadnt before this move
+	public void undoMove() {
 		
 		Colour temp = thisPlayer;
 		thisPlayer = otherPlayer;
@@ -124,10 +130,16 @@ public class Board {
 		Move m = previousMoves.pop();
 		boardArray[m.getStartpos()] = boardArray[m.getEndpos()];
 		boardArray[m.getStartpos()].getPiece().setPosition(m.getStartpos());
+		if(boardArray[m.getStartpos()].getPiece() instanceof Pawn) {
+			
+			// has moved to false if starting position == current position
+			boardArray[m.getStartpos()].getPiece().setHasMoved(!(((Pawn)(boardArray[m.getStartpos()].getPiece())).getStartingPos() == 
+					boardArray[m.getStartpos()].getPiece().getPosition()));
+		}
 		if(m.getCapture() != null) {
 			
 			boardArray[m.getEndpos()] = new PieceListNode(m.getCapture());
-			if(thisPlayer == Colour.WHITE) whitesPieceList.addNode(boardArray[m.getEndpos()]);
+			if(otherPlayer == Colour.WHITE) whitesPieceList.addNode(boardArray[m.getEndpos()]);
 			else blacksPieceList.addNode(boardArray[m.getEndpos()]);
 		}
 		else boardArray[m.getEndpos()] = null;
@@ -161,6 +173,7 @@ public class Board {
 		}
 	}
 	
+	// returns true if king belonging to 'player' is in check.
 	private boolean inCheck(Colour player) {
 		
 		return false;
@@ -200,26 +213,32 @@ public class Board {
 						while(!finished) {
 						
 							// test whether off the board
-							if((nextPosition & 0x88) != 0) finished = true;
-							// test whether next square is occupied
-							if(boardArray[nextPosition] != null) {
-								
-								// test whether next square is occupied by one of the enemy's pieces
-								if(boardArray[nextPosition].getPiece().getColour() == otherPlayer) {
-									
-									Move m = new Move(piece.getPosition(), nextPosition, boardArray[nextPosition].getPiece());
-									if(legal(m)) moves.add(m);
-								}
+							if((nextPosition & 0x88) != 0) {
 								
 								finished = true;
 							}
 							else {
 								
-								Move m = new Move(piece.getPosition(), nextPosition);
-								if(legal(m)) moves.add(m);
+								// test whether next square is occupied
+								if(boardArray[nextPosition] != null) {
+
+									// test whether next square is occupied by one of the enemy's pieces
+									if(boardArray[nextPosition].getPiece().getColour() == otherPlayer) {
+
+										Move m = new Move(piece.getPosition(), nextPosition, boardArray[nextPosition].getPiece());
+										if(legal(m)) moves.add(m);
+									}
+
+									finished = true;
+								}
+								else {
+
+									Move m = new Move(piece.getPosition(), nextPosition);
+									if(legal(m)) moves.add(m);
+								}
+
+								nextPosition = (byte)(nextPosition + move);
 							}
-							
-							nextPosition = (byte)(nextPosition + move);
 						}
 					}
 				}
@@ -228,17 +247,19 @@ public class Board {
 					for(byte move : normalMoves) {
 						
 						byte newPosition = (byte)(piece.getPosition() + move);
-						if((newPosition & 0x88) != 0) break;
-						if(boardArray[newPosition] == null) {
-							
-							Move m = new Move(piece.getPosition(), newPosition);
-							if(legal(m)) moves.add(m);
-						}
-						// test whether new square is occupied by one of the enemy's pieces pieces
-						else if(boardArray[newPosition].getPiece().getColour() == otherPlayer) {
-							
-							Move m = new Move(piece.getPosition(), newPosition, boardArray[newPosition].getPiece());
-							if(legal(m)) moves.add(m);
+						if((newPosition & 0x88) == 0) {
+
+							if(boardArray[newPosition] == null) {
+
+								Move m = new Move(piece.getPosition(), newPosition);
+								if(legal(m)) moves.add(m);
+							}
+							// test whether new square is occupied by one of the enemy's pieces pieces
+							else if(boardArray[newPosition].getPiece().getColour() == otherPlayer) {
+
+								Move m = new Move(piece.getPosition(), newPosition, boardArray[newPosition].getPiece());
+								if(legal(m)) moves.add(m);
+							}
 						}
 					}
 					
@@ -336,24 +357,26 @@ public class Board {
 				byte[] diagonalMoves = ((Pawn)piece).getCaptureDirs();
 				for(byte move : diagonalMoves) {
 					
-					if(((piece.getPosition() + move) & 0x88) != 0) break;
-					if((boardArray[piece.getPosition() + move] != null) && (boardArray[piece.getPosition() + move].getPiece().getColour() == otherPlayer)) {
+					if(((piece.getPosition() + move) & 0x88) == 0) {
 						
-						if(((Pawn)piece).oneOffFinalRow()) {
-							
-							Move m = new Move(piece.getPosition(), (byte)(piece.getPosition() + forwardMove), Piece.Type.QUEEN, boardArray[piece.getPosition() + move].getPiece());
-							if(legal(m)) { 
-								
-								moves.add(m);
-								// it should also be legal for knight as well (no point in the others)
-								m = new Move(piece.getPosition(), (byte)(piece.getPosition() + forwardMove), Piece.Type.KNIGHT, boardArray[piece.getPosition() + move].getPiece());
-								moves.add(m);
+						if((boardArray[piece.getPosition() + move] != null) && (boardArray[piece.getPosition() + move].getPiece().getColour() == otherPlayer)) {
+
+							if(((Pawn)piece).oneOffFinalRow()) {
+
+								Move m = new Move(piece.getPosition(), (byte)(piece.getPosition() + forwardMove), Piece.Type.QUEEN, boardArray[piece.getPosition() + move].getPiece());
+								if(legal(m)) { 
+
+									moves.add(m);
+									// it should also be legal for knight as well (no point in the others)
+									m = new Move(piece.getPosition(), (byte)(piece.getPosition() + forwardMove), Piece.Type.KNIGHT, boardArray[piece.getPosition() + move].getPiece());
+									moves.add(m);
+								}
 							}
-						}
-						else {
-							
-							Move m = new Move(piece.getPosition(), (byte)(piece.getPosition() + move), boardArray[piece.getPosition() + move].getPiece());
-							if(legal(m)) moves.add(m);
+							else {
+
+								Move m = new Move(piece.getPosition(), (byte)(piece.getPosition() + move), boardArray[piece.getPosition() + move].getPiece());
+								if(legal(m)) moves.add(m);
+							}
 						}
 					}
 				}

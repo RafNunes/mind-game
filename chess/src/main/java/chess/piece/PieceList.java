@@ -35,4 +35,13 @@ public class PieceList implements Iterable<PieceListNode>{
 		
 		return new PieceListIterator(head.getNext());
 	}
+	
+	public String toString() {
+		String s="";
+		for(PieceListNode n : this) {
+			
+			s+=n.toString();
+		}
+		return s;
+	}
 }

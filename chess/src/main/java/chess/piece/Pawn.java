@@ -14,11 +14,14 @@ public class Pawn extends Piece{
 	
 	private byte forwardDir;
 	private byte[] captureDirs;
+	private final byte startingPos;
 	
 	public Pawn(Colour colour, byte position) {
 		
 		super(colour, Type.PAWN, position);
 		captureDirs = new byte[2];
+		startingPos = position;
+		
 		if(colour == Colour.WHITE){
 			forwardDir = (byte)16;
 			captureDirs[0] = (byte)17;
@@ -41,5 +44,9 @@ public class Pawn extends Piece{
 		
 		// return true if has moved and is on one of the second from last rows
 		return (hasMoved() && (getPosition() + forwardDir >= 96 || getPosition() + forwardDir <= 31));
+	}
+	public byte getStartingPos() {
+		
+		return startingPos;
 	}
 }

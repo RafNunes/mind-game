@@ -43,4 +43,9 @@ public class PieceListNode {
 		
 		this.piece = piece;
 	}
+	
+	public String toString() {
+		
+		return piece.toString();
+	}
 }
