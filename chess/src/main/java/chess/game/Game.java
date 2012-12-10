@@ -6,9 +6,9 @@
 
 package chess.game;
 
-import java.util.Scanner;
 
-import chess.piece.Piece;
+
+import chess.piece.*;
 import chess.util.*;
 
 public class Game {
@@ -22,24 +22,27 @@ public class Game {
 	public Game(){
 		gameBoard = new Board();
 		Player[] players = new Player[2];
-		players[0] = new Player();
-		players[1] = new Player();
+		players[0] = new Human();
+		players[1] = new Human();
 	}
 	
 	public Board getBoard(){
 		return gameBoard;
 	}
 	
+	public void setPlayerColour(int n, Colour c){
+		if(n<0 || n>1){
+			players[n] = new Human(c);//this will be changed later.
+		}
+	}
+	
+	
 	public int getPlayerType(int n){
 		if(n!=0 || n!=1){
 			System.err.println("Bad player number");
-			return -1;
 		}
-		//if players[n] is human
-			//Return some representation of human
-		//if players[n] is AI
-			//Return some representation of AI
-		return 0;
+		return players[n].getPlayerType();
+		
 	}
 	
 	/**
@@ -57,11 +60,13 @@ public class Game {
 	 * 
 	 * @param n the player whose turn it is.
 	 */
-	public void playerTurn(int n/**, some representation of a move */){
-		//check which player's turn it is(players[n])
-		//check if move is legal
-		//update board
+	public boolean playerTurn(Move m){
+		boolean successful = false;
+		gameBoard.tryMove(m);//Needs a check to see whether move was successful
+		return successful;
 	}
+	
+
 	
 	
 	
