@@ -13,3 +13,18 @@ dependencies {
     runtime group: 'net.sourceforge.plantuml', name: 'plantuml', version: '7942'
     testCompile group : 'junit', name: 'junit', version: '4.+'
 }
+
+jar {
+    dependsOn configurations.runtime
+    
+    manifest {
+        attributes(
+            "Main-Class":"chess.launcher.Launcher",
+            "Class-Path":configurations.runtime.files.name.join(", ")
+        )
+    }
+    
+    from { 
+        configurations.runtime
+    }
+}
