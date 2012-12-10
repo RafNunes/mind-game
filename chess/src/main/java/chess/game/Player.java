@@ -6,7 +6,7 @@ import chess.util.Colour;
 
 
 
-public/**abstract*/ class Player {
+public abstract class Player {
 	
 
 	
@@ -16,9 +16,11 @@ public/**abstract*/ class Player {
 		
 	}
 	
-	public /**abstract*/ void getPlayerType(){
-		
+	public Player(Colour c){
+		this.c = c;
 	}
+	
+	public abstract int getPlayerType();
 		
 	
 	
