@@ -105,14 +105,14 @@ public class Board {
 			if(thisPlayer == Colour.WHITE) whiteKingPos = m.getEndpos();
 			else blackKingPos = m.getEndpos();
 			
-			// if left castle we must move the left rook
+			// if castling to the left, we must move the left rook
 			if(m.getStartpos() - m.getEndpos() == 2) {
 				
 				boardArray[m.getStartpos() - 1] = boardArray[m.getStartpos() - 4];
 				boardArray[m.getStartpos() - 4] = null;
 				boardArray[m.getStartpos() - 1].getPiece().setPosition((byte)(m.getStartpos() - 1));
 			}
-			// if left castle we must move the right rook
+			// if castling to the right, we must move the right rook
 			if(m.getStartpos() - m.getEndpos() == -2) {
 
 				boardArray[m.getStartpos() + 1] = boardArray[m.getStartpos() + 3];
