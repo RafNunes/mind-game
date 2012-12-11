@@ -1,6 +1,6 @@
 /**
  * Game class, acts as intermediary between the board and the UI
- * Current version by David McKenna, 6/12/12
+ * Current version by David McKenna, Demian Till
  */
 
 package chess.game;
@@ -87,9 +87,8 @@ public class Game {
 			gameBoard.makeMove(move);
 			ui.displayBoard(gameBoard.getPieces());
 			
-			if(turn == 0) turn = 1;
-			else turn = 0;
+			turn = (turn + 1) % 2;
 		}
+		ui.displayWinner((turn + 1) % 2);
 	}
-
 }

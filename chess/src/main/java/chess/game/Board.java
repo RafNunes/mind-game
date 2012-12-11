@@ -7,6 +7,11 @@ import chess.util.*;
 
 import java.util.LinkedList;
 
+/**
+ * 
+ * @author Demian Till
+ * 
+ */
 public class Board {
 	
 	private PieceList whitesPieceList;
@@ -19,6 +24,9 @@ public class Board {
 	private byte whiteKingPos; // so we don't have to search to find kings every time we check for 'check'
 	private byte blackKingPos;
 
+	/**
+	 * Constructor
+	 */
 	public Board() {
 		
 		thisPlayer = Colour.WHITE;
@@ -45,9 +53,6 @@ public class Board {
 				blacksPieceList.addPiece(new SteppingPiece(Colour.BLACK, list_pieces[i], (byte)(i+112)));
 			}
 		}
-//
-//		whitesPieceList.addPiece(new Pawn(Colour.WHITE, (byte)18));
-//		blacksPieceList.addPiece(new Pawn(Colour.BLACK, (byte)98));
 		
 		boardArray = new PieceListNode[120]; // no need for the last 8 cells which are off the board
 		for(int i = 0; i < boardArray.length; i++) {
@@ -61,6 +66,9 @@ public class Board {
 		}
 	}
 	
+	/**
+	 * @return - LinkedList<Piece> containing all of the pieces on the board
+	 */
 	public LinkedList<Piece> getPieces() {
 		
 		LinkedList<Piece> pieces = new LinkedList<Piece>();
@@ -75,24 +83,21 @@ public class Board {
 		return pieces;
 	}
 	
-	public void crappyPrint() {
-		
-		System.out.println();
-		for(int i=7;i>=0;i--) {
-			for(int j=0;j<8;j++){
-				if(boardArray[(i*16)+j] == null) System.out.print("Empty, ");
-				else System.out.print(boardArray[(i*16)+j].getPiece().getType() + ", ");
-			}
-			System.out.print('\n');
-		}
-		System.out.println();
-	}
-	
+	/**
+	 * updates the board and the pieces to reflect move m having been made.
+	 * 
+	 * @param - Move m
+	 */
 	public void makeMove(Move m) {
 		
 		tryMove(m);
 	}
 	
+	/**
+	 * updates the board and the pieces to reflect move m having been made.
+	 * 
+	 * @param - Move m
+	 */
 	public void tryMove(Move m) {
 		
 		if(boardArray[m.getEndpos()] != null) {
@@ -142,6 +147,9 @@ public class Board {
 		previousMoves.push(m);
 	}
 	
+	/**
+	 * reverts the state of the board and pieces to how they were before the most recent move was made.
+	 */
 	public void undoMove() {
 		
 		Colour temp = thisPlayer;
@@ -198,7 +206,11 @@ public class Board {
 		}
 	}
 	
-	// returns true if king belonging to 'player' is in check.
+	/**
+	 * @param - player who's king needs to be checked for 'check'.
+	 * 
+	 * @return - true if player's king is in check, false otherwise.
+	 */
 	private boolean inCheck(Colour player) {
 		
 		byte kingPos;
@@ -291,7 +303,9 @@ public class Board {
 		return false;
 	}
 	
-	// returns true if king of player whose turn it is is in checkmate
+	/**
+	 * @return - true if player whose turn it is is in checkmate, false otherwise.
+	 */
 	public boolean checkMate() {
 		
 		if(inCheck(thisPlayer)) {
@@ -302,6 +316,13 @@ public class Board {
 		return false;
 	}
 	
+	/**
+	 * Checks if an input move is illegal due to the king being put in check
+	 * 
+	 * @param - move to be checked for legality
+	 * 
+	 * @return - true if player who's turn it is is not in check after the move has been made, false otherwise.
+	 */
 	private boolean legal(Move m) {
 		
 		boolean legal = true;
@@ -311,6 +332,9 @@ public class Board {
 		return legal;
 	}
 	
+	/**
+	 * @return - LinkedList<Move> of all moves which can be made from this position by the player whose turn it is.
+	 */
 	public LinkedList<Move> generateMoves() {
 		
 		PieceList pieces;

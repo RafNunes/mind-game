@@ -69,6 +69,11 @@ private Scanner in;
 		}
 		System.out.print("\n\n");
 	}
+	
+	public void displayWinner(int player) {
+		
+		System.out.println("\n\nPlayer " + (player + 1) + " wins\n\n");
+	}
 
 	/**
 	 * Gets a player name by the colour.
