@@ -116,6 +116,6 @@ public class Move {
 		int endFile07 = endpos & 7;
 		int endRank07 = endpos >> 4;
 		
-		return "[" + files[startFile07] + startRank07 + " - " + files[endFile07] + endRank07 + "]";
+		return "[" + files[startFile07] + (startRank07 + 1) + " - " + files[endFile07] + (endRank07 + 1) + "]";
 	}
 }

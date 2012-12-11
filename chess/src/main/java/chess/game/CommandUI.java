@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,11 +18,12 @@ import chess.util.Colour;
  * 
  */
 public class CommandUI {
-
+private Scanner in;
 	/**
 	 * Constructor
 	 */
 	public CommandUI() {
+		in = new Scanner(System.in);
 	}
 
 	/**
@@ -35,20 +36,26 @@ public class CommandUI {
 		Matcher matcher;
 		Pattern pattern = Pattern.compile("[a-h][1-8][ ]*[a-h][1-8]");
 		System.out.print("Please chose next move: ");
-		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+//		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+
 		while (true) {
-			try {
-				matcher = pattern.matcher(in.readLine().toLowerCase());
-				if (matcher.find()) {
-					return matcher.group();
-				}
-			} catch (IOException ignore) {
-			} finally {
-				try {
-					in.close();
-				} catch (IOException ignore) {
-				}
+			matcher = pattern.matcher(in.nextLine().toLowerCase());
+			if (matcher.find()) {
+
+				return matcher.group();
 			}
+//			try {
+//				matcher = pattern.matcher(in.readLine().toLowerCase());
+//				if (matcher.find()) {
+//					return matcher.group();
+//				}
+//			}catch (IOException ignore) {
+//			} finally {
+//				try {
+//					in.close();
+//				} catch (IOException ignore) {
+//				}
+//			}
 			System.out.print("Invalid move, please try again : ");
 		}
 	}
@@ -98,7 +105,7 @@ public class CommandUI {
 		StringBuilder builder = new StringBuilder();
 		builder.append("    A   B   C   D   E   F   G   H\n");
 		builder.append(edge);
-		for (int i = 0; i < 8; i++) {
+		for (int i = 7; i >= 0; i--) {
 			builder.append(i + 1).append(square);
 			for (int j = 0; j < 8; j++) {
 				builder.append((board[i * 8 + j] == null ? " " : board[i * 8 + j]));

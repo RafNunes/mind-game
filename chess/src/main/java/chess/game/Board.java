@@ -46,6 +46,8 @@ public class Board {
 			}
 		}
 		
+//		whitesPieceList.addPiece(new Pawn(Colour.WHITE, (byte)18));
+		
 		boardArray = new PieceListNode[120]; // no need for the last 8 cells which are off the board
 		for(int i = 0; i < boardArray.length; i++) {
 			boardArray[i] = null;
