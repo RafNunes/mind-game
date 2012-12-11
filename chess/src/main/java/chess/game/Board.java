@@ -30,23 +30,24 @@ public class Board {
 		blackKingPos = (byte)116;
 		Piece.Type[] list_pieces = {Piece.Type.ROOK,Piece.Type.KNIGHT,Piece.Type.BISHOP,Piece.Type.QUEEN,Piece.Type.KING,Piece.Type.BISHOP,Piece.Type.KNIGHT,Piece.Type.ROOK};
 
-//		for(int i=0;i<8;i++){
-//			
-//			whitesPieceList.addPiece(new Pawn(Colour.WHITE, (byte)(i+16)));
-//			blacksPieceList.addPiece(new Pawn(Colour.BLACK, (byte)(i+96)));
-//			if(list_pieces[i] == Piece.Type.ROOK || list_pieces[i] == Piece.Type.BISHOP|| list_pieces[i] == Piece.Type.QUEEN) {
-//				
-//				whitesPieceList.addPiece(new SlidingPiece(Colour.WHITE, list_pieces[i], (byte)i));
-//				blacksPieceList.addPiece(new SlidingPiece(Colour.BLACK, list_pieces[i], (byte)(i+112)));
-//			}
-//			else { // must be knight or king
-//				
-//				whitesPieceList.addPiece(new SteppingPiece(Colour.WHITE, list_pieces[i], (byte)i));
-//				blacksPieceList.addPiece(new SteppingPiece(Colour.BLACK, list_pieces[i], (byte)(i+112)));
-//			}
-//		}
-		
-		whitesPieceList.addPiece(new Pawn(Colour.WHITE, (byte)18));
+		for(int i=0;i<8;i++){
+			
+			whitesPieceList.addPiece(new Pawn(Colour.WHITE, (byte)(i+16)));
+			blacksPieceList.addPiece(new Pawn(Colour.BLACK, (byte)(i+96)));
+			if(list_pieces[i] == Piece.Type.ROOK || list_pieces[i] == Piece.Type.BISHOP|| list_pieces[i] == Piece.Type.QUEEN) {
+				
+				whitesPieceList.addPiece(new SlidingPiece(Colour.WHITE, list_pieces[i], (byte)i));
+				blacksPieceList.addPiece(new SlidingPiece(Colour.BLACK, list_pieces[i], (byte)(i+112)));
+			}
+			else { // must be knight or king
+				
+				whitesPieceList.addPiece(new SteppingPiece(Colour.WHITE, list_pieces[i], (byte)i));
+				blacksPieceList.addPiece(new SteppingPiece(Colour.BLACK, list_pieces[i], (byte)(i+112)));
+			}
+		}
+//
+//		whitesPieceList.addPiece(new Pawn(Colour.WHITE, (byte)18));
+//		blacksPieceList.addPiece(new Pawn(Colour.BLACK, (byte)98));
 		
 		boardArray = new PieceListNode[120]; // no need for the last 8 cells which are off the board
 		for(int i = 0; i < boardArray.length; i++) {
@@ -257,7 +258,7 @@ public class Board {
 							if(i == 0) dangerType = Piece.Type.ROOK;
 							else dangerType = Piece.Type.BISHOP;
 							
-							if((boardArray[nextPosition].getPiece().getColour() == otherPlayer) &&
+							if((boardArray[nextPosition].getPiece().getColour() == enemy) &&
 									(boardArray[nextPosition].getPiece().getType() == dangerType ||
 									boardArray[nextPosition].getPiece().getType() == Piece.Type.QUEEN)) return true;
 
