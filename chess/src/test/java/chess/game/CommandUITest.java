@@ -12,7 +12,7 @@ public class CommandUITest {
 
 	@Test
 	public void testPrintBoard() {
-		commandUI.outputBoard(new ArrayList<Piece>());
+		commandUI.displayBoard(new ArrayList<Piece>());
 	}
 
 }

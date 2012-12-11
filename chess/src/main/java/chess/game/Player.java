@@ -8,7 +8,7 @@ import chess.util.Colour;
 
 public abstract class Player {
 	
-
+public boolean getTrue(){return true;}
 	
 	public Colour c;
 	

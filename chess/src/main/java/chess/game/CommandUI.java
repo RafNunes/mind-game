@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import chess.piece.Move;
 import chess.piece.Piece;
 import chess.util.Colour;
 
@@ -50,6 +52,16 @@ public class CommandUI {
 			System.out.print("Invalid move, please try again : ");
 		}
 	}
+	
+	public void displayLegalMoves(LinkedList<Move> legalMoves) {
+		
+		System.out.println("legal moves from this position: ");
+		for(Move m : legalMoves) {
+			
+			System.out.print(m.toString() + ", ");
+		}
+		System.out.print("\n\n");
+	}
 
 	/**
 	 * Gets a player name by the colour.
@@ -79,7 +91,7 @@ public class CommandUI {
 	 * 
 	 * @param pieces
 	 */
-	public void outputBoard(List<Piece> pieces) {
+	public void displayBoard(List<Piece> pieces) {
 		String[] board = getBoardRepresentation(pieces);
 		String square = " | ";
 		String edge = "  +---+---+---+---+---+---+---+---+\n";
@@ -112,7 +124,7 @@ public class CommandUI {
 	}
 
 	/**
-	 * outputs a string representing the piece
+	 * returns a string representing the piece
 	 * 
 	 * @param piece
 	 * @return
@@ -131,8 +143,17 @@ public class CommandUI {
 		return str;
 	}
 
+	/**
+	 * returns the 64 cell index corresponding to the 0x88 index stored in piece
+	 * 
+	 * @param piece
+	 * @return
+	 */
 	private int convertPositionToArrayIndex(Piece piece) {
-		return 0;
+		
+		int file07 = piece.getPosition() & 7;
+		int rank07 = piece.getPosition() >> 4;
+		return (8 * rank07) + file07;
 	}
 
 }

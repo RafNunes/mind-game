@@ -7,19 +7,22 @@ package chess.game;
 
 import chess.piece.Move;
 import chess.util.Colour;
+import java.util.LinkedList;
 
 public class Game {
 
 	Board gameBoard = new Board();
 	Player[] players;
 
-	/**
-	 * Player player1;
-	 * Player player2;
-	 */
+	public static void main(String[] args) {
+
+		Game game = new Game();
+		game.run();
+	}
+
 	public Game() {
 		gameBoard = new Board();
-		Player[] players = new Player[2];
+		players = new Player[2];
 		players[0] = new Human();
 		players[1] = new Human();
 	}
@@ -43,18 +46,6 @@ public class Game {
 	}
 
 	/**
-	 * Indicates an AI turn. Makes its own move, all it needs to know is which
-	 * side it's playing.
-	 * 
-	 * @param n
-	 *            the player whose turn it is.
-	 */
-	public void AITurn(int n) {
-		// Call board class(Send colour of players[n])
-		// Board class does move generation, evaluation, updates itself
-	}
-
-	/**
 	 * This calls the board for when a human player makes a move.
 	 * In the final version this should throw an exception for bad moves to the
 	 * UI.
@@ -69,7 +60,36 @@ public class Game {
 	}
 
 	public void run() {
-		// TODO run the game.
+		
+		CommandUI ui = new CommandUI();
+		int turn = 0;
+		ui.displayBoard(gameBoard.getPieces());
+		while(!gameBoard.checkMate()) {
+			
+			LinkedList<Move> legalMoves = gameBoard.generateMoves();
+			Move move = null;
+
+			if(players[turn] instanceof Human) {
+				
+				ui.displayLegalMoves(legalMoves);
+				while(move == null) {
+
+					String moveInput = ui.getMoveInput();
+					for(Move m : legalMoves) {
+
+						if(m.matches(moveInput)) move = m;
+					}
+				}
+			}
+			else {
+				// have a beer :)
+			}
+			gameBoard.makeMove(move);
+			ui.displayBoard(gameBoard.getPieces());
+			
+			if(turn == 0) turn = 1;
+			else turn = 0;
+		}
 	}
 
 }

@@ -18,12 +18,6 @@ public class Board {
 	private Stack<Move> previousMoves;
 	private byte whiteKingPos; // so we don't have to search to find kings every time we check for 'check'
 	private byte blackKingPos;
-	
-	public static void main(String[] args) {
-		
-		Board b = new Board();
-		System.out.println("yay");
-	}
 
 	public Board() {
 		
@@ -62,8 +56,20 @@ public class Board {
 		for(PieceListNode node : blacksPieceList){
 			boardArray[node.getPiece().getPosition()]=node;
 		}
+	}
+	
+	public LinkedList<Piece> getPieces() {
 		
-		crappyPrint();
+		LinkedList<Piece> pieces = new LinkedList<Piece>();
+		for(PieceListNode node : whitesPieceList) {
+			
+			pieces.add(node.getPiece());
+		}
+		for(PieceListNode node : blacksPieceList) {
+			
+			pieces.add(node.getPiece());
+		}
+		return pieces;
 	}
 	
 	public void crappyPrint() {
@@ -77,6 +83,11 @@ public class Board {
 			System.out.print('\n');
 		}
 		System.out.println();
+	}
+	
+	public void makeMove(Move m) {
+		
+		tryMove(m);
 	}
 	
 	public void tryMove(Move m) {
@@ -275,6 +286,17 @@ public class Board {
 		return false;
 	}
 	
+	// returns true if king of player whose turn it is is in checkmate
+	public boolean checkMate() {
+		
+		if(inCheck(thisPlayer)) {
+			
+			LinkedList<Move> moves = generateMoves();
+			if(moves.isEmpty()) return true;
+		}
+		return false;
+	}
+	
 	private boolean legal(Move m) {
 		
 		boolean legal = true;
@@ -365,14 +387,14 @@ public class Board {
 						if(!piece.hasMoved()) {
 							
 							// check whether left rook is unmoved
-							if((boardArray[piece.getPosition() - 11111] != null) && 
-									(boardArray[piece.getPosition() - 111111].getPiece().getType() == Piece.Type.ROOK) &&
-									(!boardArray[piece.getPosition() - 111111].getPiece().hasMoved())) {
+							if((boardArray[piece.getPosition() - 4] != null) && 
+									(boardArray[piece.getPosition() - 4].getPiece().getType() == Piece.Type.ROOK) &&
+									(!boardArray[piece.getPosition() - 4].getPiece().hasMoved())) {
 								
 								// check whether spaces in between are empty and not attacked
 								byte nextPosition = (byte)(piece.getPosition() - 1);
 								boolean violated = false;
-								while((nextPosition > (piece.getPosition() - 11111)) && !violated) { // !!!!!! check rules, maybe not all need to be unattacked
+								while((nextPosition > (piece.getPosition() - 4)) && !violated) { // !!!!!! check rules, maybe not all need to be unattacked
 									
 									if(boardArray[nextPosition] == null) {
 										
@@ -390,14 +412,14 @@ public class Board {
 							}
 							
 							// check whether right rook is unmoved
-							if((boardArray[piece.getPosition() + 11111] != null) && 
-									(boardArray[piece.getPosition() + 111111].getPiece().getType() == Piece.Type.ROOK) &&
-									(!boardArray[piece.getPosition() + 111111].getPiece().hasMoved())) {
+							if((boardArray[piece.getPosition() + 3] != null) && 
+									(boardArray[piece.getPosition() + 3].getPiece().getType() == Piece.Type.ROOK) &&
+									(!boardArray[piece.getPosition() + 3].getPiece().hasMoved())) {
 								
 								// check whether spaces in between are empty and not attacked
 								byte nextPosition = (byte)(piece.getPosition() + 1);
 								boolean violated = false;
-								while((nextPosition < (piece.getPosition() + 11111)) && !violated) { // !!!!!! check rules, maybe not all need to be unattacked
+								while((nextPosition < (piece.getPosition() + 3)) && !violated) { // !!!!!! check rules, maybe not all need to be unattacked
 									
 									if(boardArray[nextPosition] == null) {
 										
