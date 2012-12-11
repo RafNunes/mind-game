@@ -98,11 +98,11 @@ public class Move {
 	public boolean matches(String moveInput) {
 		
 		int startFile07 = Character.getNumericValue(moveInput.charAt(0)) - Character.getNumericValue('a');
-		int startRank07 = moveInput.charAt(1);
+		int startRank07 = Integer.valueOf(moveInput.charAt(1)) - 1;
 		int nextMoveCharacterIndex = 2;
 		while(moveInput.charAt(nextMoveCharacterIndex) == ' ') nextMoveCharacterIndex++;
 		int endFile07 = Character.getNumericValue(moveInput.charAt(nextMoveCharacterIndex)) - Character.getNumericValue('a');
-		int endRank07 = moveInput.charAt(nextMoveCharacterIndex + 1);
+		int endRank07 = Integer.valueOf(moveInput.charAt(nextMoveCharacterIndex + 1)) - 1;
 		byte inputStartPos = (byte)(startFile07 + (16 * startRank07));
 		byte inputEndPos = (byte)(endFile07 + (16 * endRank07));
 		return inputStartPos == startpos && inputEndPos == endpos;
