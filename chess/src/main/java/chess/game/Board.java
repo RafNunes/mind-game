@@ -99,6 +99,7 @@ public class Board {
 			
 			boardArray[m.getEndpos()].detachSelfFromList();
 		}
+		if(boardArray[m.getStartpos()].getPiece().hasMoved() == false) m.setFirstTimeMoving(true);
 		boardArray[m.getEndpos()] = boardArray[m.getStartpos()];
 		boardArray[m.getStartpos()] = null;
 		boardArray[m.getEndpos()].getPiece().setPosition(m.getEndpos());
@@ -149,6 +150,7 @@ public class Board {
 		Move m = previousMoves.pop();
 		boardArray[m.getStartpos()] = boardArray[m.getEndpos()];
 		boardArray[m.getStartpos()].getPiece().setPosition(m.getStartpos());
+		if(m.getFirstTimeMoving()) boardArray[m.getStartpos()].getPiece().setHasMoved(false);
 		if(boardArray[m.getStartpos()].getPiece() instanceof Pawn) {
 			
 			// has moved to false if starting position == current position
@@ -387,30 +389,36 @@ public class Board {
 					// while king's normal moves are covered in 'SteppingPieces', we need to see if we can castle
 					if(piece.getType() == Piece.Type.KING) {
 						
-						if(!piece.hasMoved()) {
+						if(!piece.hasMoved() && !inCheck(thisPlayer)) {
 							
 							// check whether left rook is unmoved
 							if((boardArray[piece.getPosition() - 4] != null) && 
 									(boardArray[piece.getPosition() - 4].getPiece().getType() == Piece.Type.ROOK) &&
 									(!boardArray[piece.getPosition() - 4].getPiece().hasMoved())) {
 								
-								// check whether spaces in between are empty and not attacked
+								// check whether spaces in between are empty
 								byte nextPosition = (byte)(piece.getPosition() - 1);
 								boolean violated = false;
-								while((nextPosition > (piece.getPosition() - 4)) && !violated) { // !!!!!! check rules, maybe not all need to be unattacked
+								while((nextPosition > (piece.getPosition() - 4)) && !violated) {
 									
-									if(boardArray[nextPosition] == null) {
+									if(boardArray[nextPosition] != null) {
 										
-										Move m = new Move(piece.getPosition(), nextPosition);
-										if(!legal(m)) violated = true;
+										violated = true;
 									}
-									else violated = true;
 									nextPosition--;
 								}
 								if(!violated) {
 									
+									// then move onto the next stage of testing.
+									// construct a move moving the king one square just to check that that square is not attacked
+									// this move will not be added to the move list
+									Move m = new Move(piece.getPosition(), (byte)(piece.getPosition() - 1));
+									if(!legal(m)) violated = true;
+								}
+								if(!violated) {
+									
 									Move m = new Move(piece.getPosition(), (byte)(piece.getPosition() - 2));
-									moves.add(m);
+									if(legal(m)) moves.add(m);
 								}
 							}
 							
@@ -419,23 +427,29 @@ public class Board {
 									(boardArray[piece.getPosition() + 3].getPiece().getType() == Piece.Type.ROOK) &&
 									(!boardArray[piece.getPosition() + 3].getPiece().hasMoved())) {
 								
-								// check whether spaces in between are empty and not attacked
+								// check whether spaces in between are empty
 								byte nextPosition = (byte)(piece.getPosition() + 1);
 								boolean violated = false;
-								while((nextPosition < (piece.getPosition() + 3)) && !violated) { // !!!!!! check rules, maybe not all need to be unattacked
+								while((nextPosition < (piece.getPosition() + 3)) && !violated) {
 									
-									if(boardArray[nextPosition] == null) {
+									if(boardArray[nextPosition] != null) {
 										
-										Move m = new Move(piece.getPosition(), nextPosition);
-										if(!legal(m)) violated = true;
+										violated = true;
 									}
-									else violated = true;
 									nextPosition++;
 								}
 								if(!violated) {
 									
+									// then move onto the next stage of testing.
+									// construct a move moving the king one square just to check that that square is not attacked
+									// this move will not be added to the move list
+									Move m = new Move(piece.getPosition(), (byte)(piece.getPosition() + 1));
+									if(!legal(m)) violated = true;
+								}
+								if(!violated) {
+									
 									Move m = new Move(piece.getPosition(), (byte)(piece.getPosition() + 2));
-									moves.add(m);
+									if(legal(m)) moves.add(m);
 								}
 							}
 						}

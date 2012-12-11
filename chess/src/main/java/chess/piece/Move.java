@@ -14,6 +14,8 @@ public class Move {
 	private byte endpos;
 	private Piece.Type promotion;
 	private Piece capture;
+	private boolean firstTimeMoving; 	// this should be set to true if it is the first time the moving piece has moved so that
+										// it can be set back to unmoved if and when the move is undone.
 
 	public Move(byte start, byte end){
 		this.startpos = start;
@@ -58,6 +60,15 @@ public class Move {
 	
 	//getters and setters
 	
+	public void setFirstTimeMoving(boolean f) {
+		
+		firstTimeMoving = f;
+	}
+	
+	public boolean getFirstTimeMoving() {
+		
+		return firstTimeMoving;
+	}
 	
 	public byte getStartpos() {
 		return startpos;

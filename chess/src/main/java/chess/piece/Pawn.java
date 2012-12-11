@@ -57,7 +57,7 @@ public class Pawn extends Piece{
 	public boolean oneOffFinalRow() {
 		
 		// return true if has moved and is on one of the second from last rows
-		return (hasMoved() && (getPosition() + forwardDir >= 96 || getPosition() + forwardDir <= 31));
+		return (hasMoved() && (getPosition() >= 96 || getPosition() <= 31));
 	}
 	public byte getStartingPos() {
 		
