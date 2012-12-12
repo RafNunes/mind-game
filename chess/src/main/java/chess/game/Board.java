@@ -347,7 +347,6 @@ public class Board {
 			
 			Piece piece = node.getPiece();
 			
-			// if piece that can move many squares per turn
 			if(piece instanceof NonPawn) {
 				
 				byte[] normalMoves = ((NonPawn)piece).getDirections();
