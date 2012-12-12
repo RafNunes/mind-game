@@ -63,32 +63,44 @@ public class Game {
 		
 		CommandUI ui = new CommandUI();
 		int turn = 0;
+		boolean gameOver = false;
 		ui.displayBoard(gameBoard.getPieces());
-		while(!gameBoard.checkMate()) {
+		while(!gameOver) {
 			
 			LinkedList<Move> legalMoves = gameBoard.generateMoves();
-			Move move = null;
-
-			if(players[turn] instanceof Human) {
+			if(legalMoves.isEmpty()) gameOver = true;
+			else {
 				
-				ui.displayLegalMoves(legalMoves);
-				while(move == null) {
+				Move move = null;
 
-					String moveInput = ui.getMoveInput();
-					for(Move m : legalMoves) {
+				if(players[turn] instanceof Human) {
 
-						if(m.matches(moveInput)) move = m;
+					ui.displayLegalMoves(legalMoves);
+					while(move == null) {
+
+						String moveInput = ui.getMoveInput();
+						for(Move m : legalMoves) {
+
+							if(m.matches(moveInput)) move = m;
+						}
 					}
 				}
+				else {
+					// have a beer :)
+				}
+				gameBoard.makeMove(move);
+				ui.displayBoard(gameBoard.getPieces());
+
+				turn = (turn + 1) % 2;
 			}
-			else {
-				// have a beer :)
-			}
-			gameBoard.makeMove(move);
-			ui.displayBoard(gameBoard.getPieces());
-			
-			turn = (turn + 1) % 2;
 		}
-		ui.displayWinner((turn + 1) % 2);
+		if(gameBoard.inCheck((turn == 0) ? Colour.WHITE : Colour.BLACK)) {
+			
+			ui.displayWinner((turn + 1) % 2);
+		}
+		else {
+			
+			ui.displayStalemate();
+		}
 	}
 }

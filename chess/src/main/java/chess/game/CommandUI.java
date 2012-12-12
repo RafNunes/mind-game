@@ -72,7 +72,12 @@ private Scanner in;
 	
 	public void displayWinner(int player) {
 		
-		System.out.println("\n\nPlayer " + (player + 1) + " wins\n\n");
+		System.out.println("\n\nGame Over, Player " + (player + 1) + " wins\n\n");
+	}
+	
+	public void displayStalemate() {
+		
+		System.out.println("\n\n Game Over, Stalemate.\n\n");
 	}
 
 	/**

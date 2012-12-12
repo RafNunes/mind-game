@@ -211,7 +211,7 @@ public class Board {
 	 * 
 	 * @return - true if player's king is in check, false otherwise.
 	 */
-	private boolean inCheck(Colour player) {
+	public boolean inCheck(Colour player) {
 		
 		byte kingPos;
 		Colour enemy;
