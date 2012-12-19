@@ -119,7 +119,20 @@ public class Move {
 		int endRank07 = Integer.valueOf(moveInput.charAt(nextMoveCharacterIndex + 1)) - 1;
 		byte inputStartPos = (byte)(startFile07 + (16 * startRank07));
 		byte inputEndPos = (byte)(endFile07 + (16 * endRank07));
-		return inputStartPos == startpos && inputEndPos == endpos;
+		if(inputStartPos == startpos && inputEndPos == endpos) {
+			
+			if(promotion == null) {
+				
+				return true;
+			}
+			else {
+				
+				if(moveInput.charAt(nextMoveCharacterIndex + 3) == 'q' && promotion == Piece.Type.QUEEN) return true;
+				if(moveInput.charAt(nextMoveCharacterIndex + 3) == 'n' && promotion == Piece.Type.KNIGHT) return true;
+				else return false;
+			}
+		}
+		else return false;
 	}
 	
 	public String toString(){

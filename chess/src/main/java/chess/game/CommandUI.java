@@ -32,7 +32,7 @@ private Scanner in;
 	 */
 	public String getMoveInput() {
 		Matcher matcher;
-		Pattern pattern = Pattern.compile("[a-h][1-8][ ]*[a-h][1-8]");
+		Pattern pattern = Pattern.compile("[a-h][1-8][ ]*[a-h][1-8](\\([q,n]\\))?");
 		System.out.print("Please chose next move: ");
 //		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
