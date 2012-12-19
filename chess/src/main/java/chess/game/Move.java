@@ -10,10 +10,11 @@ import chess.piece.Piece;
  */
 
 public class Move {
-	private byte startpos;
-	private byte endpos;
+	private final byte startpos;
+	private final byte endpos;
 	private Piece.Type promotion;
 	private Piece capture;
+	private Piece promotedPawn;
 	private boolean firstTimeMoving; 	// this should be set to true if it is the first time the moving piece has moved so that
 										// it can be set back to unmoved if and when the move is undone.
 
@@ -74,16 +75,8 @@ public class Move {
 		return startpos;
 	}
 
-	public void setStartpos(byte startpos) {
-		this.startpos = startpos;
-	}
-
 	public byte getEndpos() {
 		return endpos;
-	}
-
-	public void setEndpos(byte endpos) {
-		this.endpos = endpos;
 	}
 	
 	public Piece.Type getPromotion() {
@@ -104,6 +97,16 @@ public class Move {
 	public void setCapture(Piece capture) {
 		
 		this.capture = capture;
+	}
+	
+	public Piece getPromotedPawn() {
+		
+		return promotedPawn;
+	}
+	
+	public void setPromotedPawn(Piece promotedPawn) {
+		
+		this.promotedPawn = promotedPawn;
 	}
 	
 	public boolean matches(String moveInput) {

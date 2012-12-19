@@ -109,6 +109,8 @@ public class Board {
 		boardArray[m.getStartpos()] = null;
 		boardArray[m.getEndpos()].getPiece().setPosition(m.getEndpos());
 		if(m.getPromotion() != null) {
+			
+			m.setPromotedPawn(boardArray[m.getEndpos()].getPiece());
 
 			if(m.getPromotion() == Piece.Type.QUEEN) {
 				
@@ -161,7 +163,7 @@ public class Board {
 		if(m.getFirstTimeMoving()) boardArray[m.getStartpos()].getPiece().setHasMoved(false);
 		if(boardArray[m.getStartpos()].getPiece() instanceof Pawn) {
 			
-			// has moved to false if starting position == current position
+			// set hasMoved to false if starting position == current position
 			boardArray[m.getStartpos()].getPiece().setHasMoved(!(((Pawn)(boardArray[m.getStartpos()].getPiece())).getStartingPos() == 
 					boardArray[m.getStartpos()].getPiece().getPosition()));
 		}
@@ -175,8 +177,8 @@ public class Board {
 		
 		if(m.getPromotion() != null) {
 			
-			boardArray[m.getStartpos()].setPiece(new Pawn(thisPlayer, m.getStartpos()));
-			boardArray[m.getStartpos()].getPiece().setHasMoved(true);
+			boardArray[m.getStartpos()].setPiece(m.getPromotedPawn());
+			boardArray[m.getStartpos()].getPiece().setPosition(m.getStartpos());
 		}
 		if(boardArray[m.getStartpos()].getPiece().getType() == Piece.Type.KING) {
 			
@@ -521,12 +523,12 @@ public class Board {
 
 							if(((Pawn)piece).oneOffFinalRow()) {
 
-								Move m = new Move(piece.getPosition(), (byte)(piece.getPosition() + forwardMove), Piece.Type.QUEEN, boardArray[piece.getPosition() + move].getPiece());
+								Move m = new Move(piece.getPosition(), (byte)(piece.getPosition() + move), Piece.Type.QUEEN, boardArray[piece.getPosition() + move].getPiece());
 								if(legal(m)) { 
 
 									moves.add(m);
 									// it should also be legal for knight as well (no point in the others)
-									m = new Move(piece.getPosition(), (byte)(piece.getPosition() + forwardMove), Piece.Type.KNIGHT, boardArray[piece.getPosition() + move].getPiece());
+									m = new Move(piece.getPosition(), (byte)(piece.getPosition() + move), Piece.Type.KNIGHT, boardArray[piece.getPosition() + move].getPiece());
 									moves.add(m);
 								}
 							}
