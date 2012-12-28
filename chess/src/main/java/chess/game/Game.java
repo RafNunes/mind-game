@@ -23,25 +23,11 @@ public class Game {
 		gameBoard = new Board();
 		players = new Player[2];
 		players[0] = new Human();
-		players[1] = new Human();
+		players[1] = new AI();
 	}
 
 	public Board getBoard() {
 		return gameBoard;
-	}
-
-	public void setPlayerColour(int n, Colour c) {
-		if (n < 0 || n > 1) {
-			players[n] = new Human(c);// this will be changed later.
-		}
-	}
-
-	public int getPlayerType(int n) {
-		if (n != 0 || n != 1) {
-			System.err.println("Bad player number");
-		}
-		return players[n].getPlayerType();
-
 	}
 
 	/**
@@ -85,7 +71,8 @@ public class Game {
 					}
 				}
 				else {
-					// have a beer :)
+					
+					move = ((AI)players[turn]).makeMove(this);
 				}
 				gameBoard.makeMove(move);
 				ui.displayBoard(gameBoard.getPieces());

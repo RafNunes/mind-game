@@ -11,7 +11,4 @@ public class Human extends Player{
 	public Human(){
 		
 	}
-	public int getPlayerType(){
-		return 0;
-	}
 }

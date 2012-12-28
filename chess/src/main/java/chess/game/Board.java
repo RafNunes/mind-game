@@ -66,6 +66,50 @@ public class Board {
 		}
 	}
 	
+	// positive if player whose turn it is has more material, negative if other player has more material
+	public int getMaterialDifference(int pawnValue, int rookValue, int bishopValue, int knightValue, int queenValue) {
+		
+		int value = 0;
+		PieceList ourPieces;
+		PieceList theirPieces;
+		if(thisPlayer == Colour.WHITE) {
+			
+			ourPieces = whitesPieceList;
+			theirPieces = blacksPieceList;
+		}
+		else {
+			
+			ourPieces = blacksPieceList;
+			theirPieces = whitesPieceList;
+		}
+		
+		for(PieceListNode node : ourPieces) {
+			
+			switch(node.getPiece().getType()) {
+			
+			case PAWN: value += pawnValue; break;
+			case ROOK: value += rookValue; break;
+			case BISHOP: value += bishopValue; break;
+			case KNIGHT: value += knightValue; break;
+			case QUEEN: value += queenValue; break;
+			default:
+			}
+		}
+		for(PieceListNode node : theirPieces) {
+			
+			switch(node.getPiece().getType()) {
+			
+			case PAWN: value -= pawnValue; break;
+			case ROOK: value -= rookValue; break;
+			case BISHOP: value -= bishopValue; break;
+			case KNIGHT: value -= knightValue; break;
+			case QUEEN: value -= queenValue; break;
+			default:
+			}
+		}
+		return value;
+	}
+	
 	/**
 	 * @return - LinkedList<Piece> containing all of the pieces on the board
 	 */
