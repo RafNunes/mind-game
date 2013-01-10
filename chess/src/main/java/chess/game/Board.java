@@ -589,6 +589,21 @@ public class Board {
 		
 		return moves;
 	}
+	
+	public LinkedList<Move> generateMovesFromOpponentsPerspective() {
+		
+		Colour temp = thisPlayer;
+		thisPlayer = otherPlayer;
+		otherPlayer = temp;
+		
+		LinkedList<Move> moves = generateMoves();
+		
+		temp = thisPlayer;
+		thisPlayer = otherPlayer;
+		otherPlayer = temp;
+		
+		return moves;
+	}
 }
 
 

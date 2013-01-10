@@ -4,13 +4,13 @@ import java.util.LinkedList;
 
 public class AI extends Player{
 	
-	private static final int pawnValue = 1;
-	private static final int rookValue = 5;
-	private static final int bishopValue = 3;
-	private static final int knightValue = 3;
-	private static final int queenValue = 9;
+	private static final int pawnValue = 10;
+	private static final int rookValue = 50;
+	private static final int bishopValue = 30;
+	private static final int knightValue = 30;
+	private static final int queenValue = 90;
 	
-	private static final int maxDepth = 4;
+	private static final int maxDepth = 3;
 	
 	private class MoveValuePair {
 		public MoveValuePair(Move m, int v) {
@@ -31,19 +31,20 @@ public class AI extends Player{
 	// turn it is in this position (not necessarily the player that the AI is representing).
 	private MoveValuePair getBestMove(Board board, int currentDepth) {
 		
-		if(currentDepth >= maxDepth) {
-			
-			int value = board.getMaterialDifference(pawnValue, rookValue, bishopValue, knightValue, queenValue);
-			return new MoveValuePair(null, value);
-		}
+		LinkedList<Move> moves = board.generateMoves();
+		
+		// check for checkmate or stalemate.
+		// For now, we don't like stalemate. In the future, this should depend on how strong a position we are in.
+		if(moves.isEmpty()) return new MoveValuePair(null, Integer.MIN_VALUE);
 		else {
 			
-			LinkedList<Move> moves = board.generateMoves();
-			
-			// check for check mate or stalemate
-			if(moves.isEmpty()) return new MoveValuePair(null, Integer.MIN_VALUE);
+			if(currentDepth >= maxDepth) {
+				
+				int value = evaluateBoard(board);
+				return new MoveValuePair(null, value);
+			}
 			else {
-			
+
 				// this will be overidden unless all moves happen to have value Integer.MIN_VALUE
 				MoveValuePair bestPair = new MoveValuePair(moves.getFirst(), Integer.MIN_VALUE);
 
@@ -61,8 +62,20 @@ public class AI extends Player{
 					board.undoMove();
 				}
 				return bestPair;
+
 			}
 		}
+	}
+	
+	// evaluates the board from the perspective of whoever's turn it is based on the current state of the board.
+	private int evaluateBoard(Board board) {
+		
+		int value = board.getMaterialDifference(pawnValue, rookValue, bishopValue, knightValue, queenValue);
+		
+		// suppose each available move is worth 0.2 pawns
+		value += board.generateMoves().size() * 2; // pawn is worth 10, not 1...
+		value -= board.generateMovesFromOpponentsPerspective().size() * 2;
+		return value;
 	}
 }
 
