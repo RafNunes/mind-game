@@ -102,22 +102,4 @@ public class PieceTest {
 		}
 	}
 
-	@Test(expected = Exception.class)
-	// tests to make sure pieces can't be assigned to the wrong class for
-	// SlidingPieces
-	@Ignore
-	public void wrongSlide() throws InvalidPiece {
-		Piece p = new SlidingPiece(Colour.BLACK, Type.KING, (byte) 0);
-
-	}
-
-	@Test(expected = Exception.class)
-	// tests to make sure pieces can't be assigned to the wrong class for
-	// OnePieces
-	// TODO Needs fixing
-	@Ignore
-	public void wrongOne() throws InvalidPiece {
-		Piece p = new SteppingPiece(Colour.BLACK, Type.ROOK, (byte) 0);
-
-	}
 }
