@@ -11,10 +11,11 @@ public class AI extends Player{
 	private static final int queenValue = 90;
 
 	/**
-	 * Edited by Craig Martin 11/01/13, Depth to 2 for testing purposes
+	 * Edited by Craig Martin 11/01/13, Testing for minimax, 
+	 * Changes undone 16/01/13, minimax is all good
 	 */
 
-	private static final int maxDepth = 3;
+	private static final int maxDepth = 5;
 
 	private class MoveValuePair {
 		public MoveValuePair(Move m, int v) {
@@ -48,7 +49,6 @@ public class AI extends Player{
 				return new MoveValuePair(null, value);
 			}
 			else {
-				System.out.println("Depth" + currentDepth);
 				
 				// this will be overidden unless all moves happen to have value Integer.MIN_VALUE
 				MoveValuePair bestPair = new MoveValuePair(moves.getFirst(), Integer.MIN_VALUE);
@@ -65,10 +65,7 @@ public class AI extends Player{
 						bestPair = new MoveValuePair(m, -bestCounter.value);
 					}
 					board.undoMove();
-					System.out.println("Current Best :" + bestPair.move + bestPair.value);
 				}
-				// testing code to be removed at a later date - Craig Martin
-				System.out.println("Returned best :" + bestPair.move + bestPair.value);
 				return bestPair;
 
 			}
