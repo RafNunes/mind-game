@@ -66,9 +66,18 @@ public class AI extends Player{
 				LinkedList<MoveValuePair> moveValuePairs = new LinkedList<MoveValuePair>();
 				for(Move m : moves) {
 					
-					board.tryMove(m);
-					int value = -verySimpleEvaluation(board);
-					board.undoMove();
+					int value = 0;
+					if(m.getCapture() != null) {
+						
+						switch(m.getCapture().getType()) {
+						
+						case PAWN: value += pawnValue; break;
+						case ROOK: value += rookValue; break;
+						case BISHOP: value += bishopValue; break;
+						case KNIGHT: value += knightValue; break;
+						case QUEEN: value += queenValue; break;
+						}
+					}
 					moveValuePairs.add(new MoveValuePair(m, value));
 				}
 				Collections.sort(moveValuePairs, new MoveValuePairComparator());
@@ -108,12 +117,6 @@ public class AI extends Player{
 		// suppose each available move is worth 0.2 pawns
 		value += board.generateMoves().size() * 2; // pawn is worth 10, not 1...
 		value -= board.generateMovesFromOpponentsPerspective().size() * 2;
-		return value;
-	}
-	
-	private int verySimpleEvaluation(Board board) {
-		
-		int value = board.getMaterialDifference(pawnValue, rookValue, bishopValue, knightValue, queenValue);
 		return value;
 	}
 }
