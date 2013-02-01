@@ -4,6 +4,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 
+import chess.util.Colour;
+
+/**
+ * 
+ * @author craigmartin
+ * Edited to add several new features to improve evaluation.
+ * 
+ */
+
 public class AI extends Player{
 	
 	private static final int pawnValue = 10;
@@ -17,6 +26,13 @@ public class AI extends Player{
 	// Need value >= to absolute value of any position. Cannot use Integer.MAX_VALUE because we need 
 	// to be able to negate it and negate the negation.
 	private static final int maxVal = 999999999;
+	
+	/**
+	 * Used for King position evaluation
+	 */
+	
+	private boolean endgame = false;
+	
 	
 	private class MoveValuePair {
 		public MoveValuePair(Move m, int v) {
@@ -108,16 +124,57 @@ public class AI extends Player{
 			}
 		}
 	}
-	
+	// currently the value is calculated from scratch every time, can we carry this across?
 	// evaluates the board from the perspective of whoever's turn it is based on the current state of the board.
 	private int evaluateBoard(Board board) {
+		int total;
+		int value = 0;
 		
-		int value = board.getMaterialDifference(pawnValue, rookValue, bishopValue, knightValue, queenValue);
 		
-		// suppose each available move is worth 0.2 pawns
-		value += board.generateMoves().size() * 2; // pawn is worth 10, not 1...
-		value -= board.generateMovesFromOpponentsPerspective().size() * 2;
+		if (!endgame){
+			total = board.getMaterialTotalBlack(pawnValue, rookValue, bishopValue, knightValue, queenValue) +  board.getMaterialTotalWhite(pawnValue, rookValue, bishopValue, knightValue, queenValue);
+			if (total < 15){
+				endgame = true;
+			}
+		}
+		
+		// Assigns points material difference. Low cost & MUST
+		value += getDifference(board);
+		
+		//Assigns points for available moves. High cost & should
+		value += getMovesValue(board);
+			
 		return value;
+	}
+	/*
+	 * Creating functions for each evaluation. Keeps code separate
+	 *  + allows for easier reading
+	 *  + allows functions to be added/removed from evaluator without losing code 
+	 */
+	
+	/**
+	 * Gets the material difference. Low cost, essential for basic decision making
+	 * @param board
+	 * @return
+	 */
+	protected  int getDifference(Board board){
+		if(board.getThisPlayer() == Colour.WHITE) {
+
+			return board.getMaterialTotalWhite(pawnValue,rookValue, bishopValue, knightValue,  queenValue) - board.getMaterialTotalBlack(pawnValue,rookValue, bishopValue, knightValue,  queenValue);
+		}
+		else {
+
+			return board.getMaterialTotalBlack(pawnValue,rookValue, bishopValue, knightValue,  queenValue) - board.getMaterialTotalWhite(pawnValue,rookValue, bishopValue, knightValue,  queenValue);
+		}
+	}
+	/**
+	 * Get the number of available moves. High cost, difficult for exact numbers, should have
+	 * @param board
+	 * @return
+	 */
+	protected int getMovesValue(Board board){
+		// suppose each available move is worth 0.2 pawns
+				return board.generateMoves().size() * 2 - board.generateMovesFromOpponentsPerspective().size() * 2; // pawn is worth 10 
 	}
 }
 
