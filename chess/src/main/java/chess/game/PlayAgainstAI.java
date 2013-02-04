@@ -6,14 +6,19 @@ import java.util.LinkedList;
 
 import chess.util.Colour;
 
-/**
- * 
- * @author craigmartin
- * Edited to add several new features to improve evaluation.
- * 
- */
+public class PlayAgainstAI extends AI{
 
-public class AI extends Player{
+
+
+
+	/**
+	 * 
+	 * @author craigmartin
+	 * Copy old versions of the AI in here to see how they play against new AI. Can be deleted later
+	 * First Version of AI. Includes Value and Mobility
+	 * 
+	 */
+
 
 	private static final int pawnValue = 10;
 	private static final int rookValue = 50;
@@ -92,8 +97,6 @@ public class AI extends Player{
 						case BISHOP: value += bishopValue; break;
 						case KNIGHT: value += knightValue; break;
 						case QUEEN: value += queenValue; break;
-						default:
-							break;
 						}
 					}
 					moveValuePairs.add(new MoveValuePair(m, value));
@@ -179,26 +182,4 @@ public class AI extends Player{
 		return board.generateMoves().size() * 2 - board.generateMovesFromOpponentsPerspective().size() * 2; // pawn is worth 10 
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

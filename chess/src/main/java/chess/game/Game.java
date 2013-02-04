@@ -14,16 +14,19 @@ public class Game {
 	Player[] players;
 
 	public static void main(String[] args) {
-
-		Game game = new Game();
+		Game game = new Game(args[0]);
 		game.run();
 	}
 
-	public Game() {
+	public Game(String args) {
 		gameBoard = new Board();
 		players = new Player[2];
-		players[0] = new Human();
-		players[1] = new AI();
+		players[0] = new AI();
+		if(args.contentEquals("a")){
+			players[1] = new PlayAgainstAI();}
+		else{
+			players[1] = new Human();
+		}
 	}
 
 	public Board getBoard() {
@@ -73,6 +76,7 @@ public class Game {
 				else {
 					
 					move = ((AI)players[turn]).makeMove(this);
+					System.out.println(move);
 				}
 				gameBoard.makeMove(move);
 				ui.displayBoard(gameBoard.getPieces());

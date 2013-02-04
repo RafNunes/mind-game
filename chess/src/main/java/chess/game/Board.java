@@ -82,7 +82,17 @@ public class Board {
 
 			switch(node.getPiece().getType()) {
 
-			case PAWN: value += pawnValue; break;
+			case PAWN: value += pawnValue; 
+			if ((node.getPiece().getPosition() % 16) == 0 || node.getPiece().getPosition() % 16 == 7){
+				value -= (pawnValue /100) * 15;
+			}
+			if ((node.getPiece().getPosition() > 79)){
+				value += pawnValue/2; //temp value - must confirm with David Watt
+			}
+			if ((node.getPiece().getPosition() > 95)){
+				value += queenValue/2; //temp value -must confirm with David Watt
+			}
+			break;
 			case ROOK: value += rookValue; break;
 			case BISHOP: value += bishopValue; break;
 			case KNIGHT: value += knightValue; break;
@@ -111,7 +121,18 @@ public class Board {
 
 			switch(node.getPiece().getType()) {
 
-			case PAWN: value += pawnValue; break;
+			//black has the exact same thing but in reverse
+			case PAWN: value += pawnValue; 
+			if ((node.getPiece().getPosition() % 16) == 0 || node.getPiece().getPosition() % 16 == 7){
+				value -= (pawnValue /100) * 15;
+			}
+			if ((node.getPiece().getPosition() < 79)){
+				value += pawnValue/2; //temp value - must confirm with David Watt
+			}
+			if ((node.getPiece().getPosition() < 95)){
+				value += queenValue/2; //temp value -must confirm with David Watt
+			}
+			break;
 			case ROOK: value += rookValue; break;
 			case BISHOP: value += bishopValue; break;
 			case KNIGHT: value += knightValue; break;
@@ -123,21 +144,7 @@ public class Board {
 	}
 
 	// positive if player whose turn it is has more material, negative if other player has more material
-	/**
-	 * Edit by Craig Martin to tie in with above methods
-	 * @param pawnValue
-	 * @param rookValue
-	 * @param bishopValue
-	 * @param knightValue
-	 * @param queenValue
-	 * @return
-	 */
-	public int getMaterialDifference(int pawnValue, int rookValue, int bishopValue, int knightValue, int queenValue) {
 
-		int value = 0;
-		
-	return value;
-}
 
 /**
  * @return - LinkedList<Piece> containing all of the pieces on the board
