@@ -14,18 +14,24 @@ public class Game {
 	Player[] players;
 
 	public static void main(String[] args) {
-		Game game = new Game(args[0]);
+		Game game;
+		if(args.length == 0){
+			game = new Game("");
+		}
+		else{
+			game = new Game(args[0]);
+		}
 		game.run();
 	}
 
 	public Game(String args) {
 		gameBoard = new Board();
 		players = new Player[2];
-		players[0] = new AI();
-		if(args.contentEquals("a")){
-			players[1] = new PlayAgainstAI();}
+		players[1] = new AI();
+		if(args.contentEquals("AI")){
+			players[0] = new PlayAgainstAI();}
 		else{
-			players[1] = new Human();
+			players[0] = new Human();
 		}
 	}
 

@@ -1,11 +1,14 @@
 package chess.piece;
 
+import chess.piece.Piece.Type;
+
 
 public class PieceListNode {
 
 	private PieceListNode previous;
 	private PieceListNode next;
 	private Piece piece;
+
 	
 	public void detachSelfFromList() {
 		

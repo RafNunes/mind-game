@@ -4,21 +4,18 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 
+import chess.piece.PieceList;
+import chess.piece.PieceListNode;
 import chess.util.Colour;
 
+/**
+ * 
+ * @author craigmartin
+ * Basic AI. Current AI should be able to beat. Currently Draws/Stalemates
+ * 
+ */
+
 public class PlayAgainstAI extends AI{
-
-
-
-
-	/**
-	 * 
-	 * @author craigmartin
-	 * Copy old versions of the AI in here to see how they play against new AI. Can be deleted later
-	 * First Version of AI. Includes Value and Mobility
-	 * 
-	 */
-
 
 	private static final int pawnValue = 10;
 	private static final int rookValue = 50;
@@ -97,6 +94,8 @@ public class PlayAgainstAI extends AI{
 						case BISHOP: value += bishopValue; break;
 						case KNIGHT: value += knightValue; break;
 						case QUEEN: value += queenValue; break;
+						default:
+							break;
 						}
 					}
 					moveValuePairs.add(new MoveValuePair(m, value));
@@ -137,7 +136,7 @@ public class PlayAgainstAI extends AI{
 
 
 		if (!endgame){
-			total = board.getMaterialTotalBlack(pawnValue, rookValue, bishopValue, knightValue, queenValue) +  board.getMaterialTotalWhite(pawnValue, rookValue, bishopValue, knightValue, queenValue);
+			total = getMaterialTotalBlack(board) +  getMaterialTotalWhite(board);
 			if (total < 15){
 				endgame = true;
 			}
@@ -165,11 +164,11 @@ public class PlayAgainstAI extends AI{
 	protected  int getDifference(Board board){
 		if(board.getThisPlayer() == Colour.WHITE) {
 
-			return board.getMaterialTotalWhite(pawnValue,rookValue, bishopValue, knightValue,  queenValue) - board.getMaterialTotalBlack(pawnValue,rookValue, bishopValue, knightValue,  queenValue);
+			return getMaterialTotalWhite(board) - getMaterialTotalBlack(board);
 		}
 		else {
 
-			return board.getMaterialTotalBlack(pawnValue,rookValue, bishopValue, knightValue,  queenValue) - board.getMaterialTotalWhite(pawnValue,rookValue, bishopValue, knightValue,  queenValue);
+			return getMaterialTotalBlack(board) - getMaterialTotalWhite(board);
 		}
 	}
 	/**
@@ -181,5 +180,87 @@ public class PlayAgainstAI extends AI{
 		// suppose each available move is worth 0.2 pawns
 		return board.generateMoves().size() * 2 - board.generateMovesFromOpponentsPerspective().size() * 2; // pawn is worth 10 
 	}
+
+	/**
+	 * Created by Craig Martin - useful for evaluating endgame
+	 * @param pawnValue
+	 * @param rookValue
+	 * @param bishopValue
+	 * @param knightValue
+	 * @param queenValue
+	 * @return
+	 */
+	protected int getMaterialTotalWhite(Board b){
+		int value = 0;
+		PieceList pieces = b.getWhitesList();
+
+		for(PieceListNode node : pieces) {
+
+			switch(node.getPiece().getType()) {
+
+			case PAWN: value += pawnValue; break;
+			case ROOK: value += rookValue; break;
+			case BISHOP: value += bishopValue; break;
+			case KNIGHT: value += knightValue; break;
+			case QUEEN: value += queenValue; break;
+			default:
+
+
+			}
+		}
+		return value;
+	}
+	/**
+	 * Created by Craig Martin, improves collection of material - useful for denoting an endgame
+	 * @param pawnValue
+	 * @param rookValue
+	 * @param bishopValue
+	 * @param knightValue
+	 * @param queenValue
+	 * @return
+	 */
+	protected int getMaterialTotalBlack(Board b){
+		int value = 0;
+		PieceList pieces = b.getBlacksList();
+
+		for(PieceListNode node : pieces) {
+
+			switch(node.getPiece().getType()) {
+
+			//black has the exact same thing but in reverse
+			case PAWN: value += pawnValue; break;
+			case ROOK: value += rookValue; break;
+			case BISHOP: value += bishopValue; break;
+			case KNIGHT: value += knightValue; break;
+			case QUEEN: value += queenValue; break;
+			default:
+			}
+		}
+		return value;
+	}
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
