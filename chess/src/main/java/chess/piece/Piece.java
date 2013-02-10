@@ -1,5 +1,6 @@
 package chess.piece;
 
+import chess.piece.Piece.Type;
 import chess.util.Colour;
 
 /**
@@ -19,6 +20,7 @@ abstract public class Piece {
 	public enum Type {
 		PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING, NULL;
 	}
+
 
 	// Variables needed
 	private final Colour colour;

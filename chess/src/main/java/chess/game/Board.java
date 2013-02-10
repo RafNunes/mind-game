@@ -31,7 +31,7 @@ public class Board {
 	public Board() {
 
 		thisPlayer = Colour.WHITE;
-		otherPlayer = Colour.BLACK;
+		setOtherPlayer(Colour.BLACK);
 		previousMoves = new Stack<Move>();
 		whitesPieceList = new PieceList();
 		blacksPieceList = new PieceList();
@@ -202,8 +202,8 @@ public class Board {
 		}
 
 		Colour temp = thisPlayer;
-		thisPlayer = otherPlayer;
-		otherPlayer = temp;
+		thisPlayer = getOtherPlayer();
+		setOtherPlayer(temp);
 		previousMoves.push(m);
 	}
 
@@ -215,8 +215,8 @@ public class Board {
 		
 
 		Colour temp = thisPlayer;
-		thisPlayer = otherPlayer;
-		otherPlayer = temp;
+		thisPlayer = getOtherPlayer();
+		setOtherPlayer(temp);
 		Move m = previousMoves.pop();
 		boardArray[m.getStartpos()] = boardArray[m.getEndpos()];
 		boardArray[m.getStartpos()].getPiece().setPosition(m.getStartpos());		
@@ -235,7 +235,7 @@ public class Board {
 		if(m.getCapture() != null) {
 
 			boardArray[m.getEndpos()] = new PieceListNode(m.getCapture());
-			if(otherPlayer == Colour.WHITE) whitesPieceList.addNode(boardArray[m.getEndpos()]);
+			if(getOtherPlayer() == Colour.WHITE) whitesPieceList.addNode(boardArray[m.getEndpos()]);
 			else blacksPieceList.addNode(boardArray[m.getEndpos()]);
 		}
 		else boardArray[m.getEndpos()] = null;
@@ -392,11 +392,11 @@ public class Board {
 	 * 
 	 * @return - true if player who's turn it is is not in check after the move has been made, false otherwise.
 	 */
-	private boolean legal(Move m) {
+	protected boolean legal(Move m) {
 
 		boolean legal = true;
 		tryMove(m);
-		if(inCheck(otherPlayer)) legal = false; // since the board has progressed a turn at this point, 'we' are the 'otherPlayer'
+		if(inCheck(getOtherPlayer())) legal = false; // since the board has progressed a turn at this point, 'we' are the 'otherPlayer'
 		undoMove();
 		return legal;
 	}
@@ -438,7 +438,7 @@ public class Board {
 								if(boardArray[nextPosition] != null) {
 
 									// test whether next square is occupied by one of the enemy's pieces
-									if(boardArray[nextPosition].getPiece().getColour() == otherPlayer) {
+									if(boardArray[nextPosition].getPiece().getColour() == getOtherPlayer()) {
 
 										Move m = new Move(piece.getPosition(), nextPosition, boardArray[nextPosition].getPiece());
 										if(legal(m)) moves.add(m);
@@ -470,7 +470,7 @@ public class Board {
 								if(legal(m)) moves.add(m);
 							}
 							// test whether new square is occupied by one of the enemy's pieces pieces
-							else if(boardArray[newPosition].getPiece().getColour() == otherPlayer) {
+							else if(boardArray[newPosition].getPiece().getColour() == getOtherPlayer()) {
 
 								Move m = new Move(piece.getPosition(), newPosition, boardArray[newPosition].getPiece());
 								if(legal(m)) moves.add(m);
@@ -586,7 +586,7 @@ public class Board {
 
 					if(((piece.getPosition() + move) & 0x88) == 0) {
 
-						if((boardArray[piece.getPosition() + move] != null) && (boardArray[piece.getPosition() + move].getPiece().getColour() == otherPlayer)) {
+						if((boardArray[piece.getPosition() + move] != null) && (boardArray[piece.getPosition() + move].getPiece().getColour() == getOtherPlayer())) {
 
 							if(((Pawn)piece).oneOffFinalRow()) {
 
@@ -616,17 +616,31 @@ public class Board {
 	public LinkedList<Move> generateMovesFromOpponentsPerspective() {
 
 		Colour temp = thisPlayer;
-		thisPlayer = otherPlayer;
-		otherPlayer = temp;
+		thisPlayer = getOtherPlayer();
+		setOtherPlayer(temp);
 
 		LinkedList<Move> moves = generateMoves();
 
 		temp = thisPlayer;
-		thisPlayer = otherPlayer;
-		otherPlayer = temp;
+		thisPlayer = getOtherPlayer();
+		setOtherPlayer(temp);
 
 		return moves;
 	}
+	
+	public boolean inRange (byte pos){
+		return((pos & 0x88) == 0);
+	}
+
+	public Colour getOtherPlayer() {
+		return otherPlayer;
+	}
+
+	public void setOtherPlayer(Colour otherPlayer) {
+		this.otherPlayer = otherPlayer;
+	}
+
+	
 }
 
 
