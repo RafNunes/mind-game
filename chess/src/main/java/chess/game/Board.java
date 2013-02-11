@@ -629,7 +629,7 @@ public class Board {
 	}
 	
 	public boolean inRange (byte pos){
-		return((pos & 0x88) == 0);
+		return((pos & 0x88) == 0 && pos < (byte)120);
 	}
 
 	public Colour getOtherPlayer() {

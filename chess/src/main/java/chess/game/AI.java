@@ -162,15 +162,14 @@ public class AI extends Player{
 		//Assigns points for available moves. High cost & should
 		value += getMovesValue(board);
 
-		//
+		//Assigns points based on how well protected the King is in start game/middle game
+		value += getKingProtectionValue(board);
 
 		//Detracts points if castled or unable to castle. However is balanced out by King protection
 		value += hasCastled(board);
 
 		return value;
 	}
-
-
 
 
 	/*
@@ -261,8 +260,6 @@ public class AI extends Player{
 					}
 				}
 			}
-
-
 			/*
 			 * Central Control
 			 */
@@ -272,29 +269,56 @@ public class AI extends Player{
 			else if ((canAttack(node.getPiece(), (byte) 51, b)) ||(canAttack(node.getPiece(), (byte) 52, b)) || (canAttack(node.getPiece(), (byte) 67, b)) || (canAttack(node.getPiece(), (byte) 51, b))){
 				value += (pawnValue/10);
 			}
+			/*
+			 * Wider centre control
+			 */
+			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
+				value += (pawnValue/10);
+			}
 			break;
 			case ROOK: value += rookValue;
 			if ((pos == (byte)51 || pos ==(byte)52 || pos == (byte)67 || pos == (byte)68)){
 				value += (pawnValue/10)*2;}
+			else if ((canAttack(node.getPiece(), (byte) 51, b)) ||(canAttack(node.getPiece(), (byte) 52, b)) || (canAttack(node.getPiece(), (byte) 67, b)) || (canAttack(node.getPiece(), (byte) 51, b))){
+				value += (pawnValue/10);
+			}
+			/*
+			 * Wider centre control
+			 */
+			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
+				value += (pawnValue/10);
+			}
 			// +50% of pawnScore for saving Rook till after two other minor pieces have moved
 			if ((!node.getPiece().hasMoved()) && b.getMinorDeveloped() <= 2){
 				value += (pawnValue/5);
 			}
-			else if ((canAttack(node.getPiece(), (byte) 51, b)) ||(canAttack(node.getPiece(), (byte) 52, b)) || (canAttack(node.getPiece(), (byte) 67, b)) || (canAttack(node.getPiece(), (byte) 51, b))){
-				value += (pawnValue/10);
-			}
+
+
 			break;
 			case BISHOP: value += bishopValue;
 			if ((pos == (byte)51 || pos ==(byte)52 || pos == (byte)67 || pos == (byte)68)){
 				value += (pawnValue/10)*2;
+			}else if ((canAttack(node.getPiece(), (byte) 51, b)) ||(canAttack(node.getPiece(), (byte) 52, b)) || (canAttack(node.getPiece(), (byte) 67, b)) || (canAttack(node.getPiece(), (byte) 51, b))){
+				value += (pawnValue/10);
 			}
-
+			/*
+			 * Wider centre control
+			 */
+			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
+				value += (pawnValue/10);
+			}
 			break;
 			case KNIGHT: value += knightValue;
 			if ((pos == (byte)51 || pos ==(byte)52 || pos == (byte)67 || pos == (byte)68)){
 				value += (pawnValue/10)*2;
 			}
 			else if ((canAttack(node.getPiece(), (byte) 51, b)) ||(canAttack(node.getPiece(), (byte) 52, b)) || (canAttack(node.getPiece(), (byte) 67, b)) || (canAttack(node.getPiece(), (byte) 51, b))){
+				value += (pawnValue/10);
+			}
+			/*
+			 * Wider centre control
+			 */
+			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
 				value += (pawnValue/10);
 			}
 			// 20% of pawnScore for developing knight before bishop
@@ -307,6 +331,12 @@ public class AI extends Player{
 				value += (pawnValue/10)*3;
 			}
 			else if ((canAttack(node.getPiece(), (byte) 51, b)) ||(canAttack(node.getPiece(), (byte) 52, b)) || (canAttack(node.getPiece(), (byte) 67, b)) || (canAttack(node.getPiece(), (byte) 51, b))){
+				value += (pawnValue/10);
+			}
+			/*
+			 * Wider centre control
+			 */
+			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
 				value += (pawnValue/10);
 			}
 			// +33% of pawnScore for saving Queen till after two other minor pieces have moved
@@ -327,12 +357,8 @@ public class AI extends Player{
 
 	/**
 	 * Created by Craig Martin, improves collection of material - useful for denoting an endgame
-	 * @param pawnValue
-	 * @param rookValue
-	 * @param bishopValue
-	 * @param knightValue
-	 * @param queenValue
-	 * @return
+	 * @param board
+	 * @return the total value of the black pieces
 	 * Numbers for central control provided by David McKenna
 	 */
 	private int getMaterialTotalBlack(Board b){
@@ -379,6 +405,12 @@ public class AI extends Player{
 			else if ((canAttack(node.getPiece(), (byte) 51, b)) ||(canAttack(node.getPiece(), (byte) 52, b)) || (canAttack(node.getPiece(), (byte) 67, b)) || (canAttack(node.getPiece(), (byte) 51, b))){
 				value += (pawnValue/10);
 			}
+			/*
+			 * Wider centre control
+			 */
+			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
+				value += (pawnValue/10);
+			}
 			break;
 			case ROOK: value += rookValue;
 			/*
@@ -388,6 +420,12 @@ public class AI extends Player{
 				value += (pawnValue/10)*2;
 			}
 			else if ((canAttack(node.getPiece(), (byte) 51, b)) ||(canAttack(node.getPiece(), (byte) 52, b)) || (canAttack(node.getPiece(), (byte) 67, b)) || (canAttack(node.getPiece(), (byte) 51, b))){
+				value += (pawnValue/10);
+			}
+			/*
+			 * Wider centre control
+			 */
+			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
 				value += (pawnValue/10);
 			}
 			// +50% of pawnScore for saving Rook till after two other minor pieces have moved
@@ -404,12 +442,24 @@ public class AI extends Player{
 			}else if ((canAttack(node.getPiece(), (byte) 51, b)) ||(canAttack(node.getPiece(), (byte) 52, b)) || (canAttack(node.getPiece(), (byte) 67, b)) || (canAttack(node.getPiece(), (byte) 51, b))){
 				value += (pawnValue/10);
 			}
+			/*
+			 * Wider centre control
+			 */
+			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
+				value += (pawnValue/10);
+			}
 			break;
 
 			case KNIGHT: value += knightValue;
 			if ((pos == (byte)51 || pos ==(byte)52 || pos == (byte)67 || pos == (byte)68)){
 				value += (pawnValue/10)*2;
 			}else if ((canAttack(node.getPiece(), (byte) 51, b)) ||(canAttack(node.getPiece(), (byte) 52, b)) || (canAttack(node.getPiece(), (byte) 67, b)) || (canAttack(node.getPiece(), (byte) 51, b))){
+				value += (pawnValue/10);
+			}
+			/*
+			 * Wider centre control
+			 */
+			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
 				value += (pawnValue/10);
 			}
 			// 20% of pawnScore for developing knight before bishop
@@ -424,6 +474,12 @@ public class AI extends Player{
 			if ((pos == (byte)51 || pos ==(byte)52 || pos == (byte)67 || pos == (byte)68)){
 				value += (pawnValue/10)*3;
 			}else if ((canAttack(node.getPiece(), (byte) 51, b)) ||(canAttack(node.getPiece(), (byte) 52, b)) || (canAttack(node.getPiece(), (byte) 67, b)) || (canAttack(node.getPiece(), (byte) 51, b))){
+				value += (pawnValue/10);
+			}
+			/*
+			 * Wider centre control
+			 */
+			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
 				value += (pawnValue/10);
 			}
 			// +33% of pawnScore for saving Queen till after two other minor pieces have moved
@@ -560,6 +616,90 @@ public class AI extends Player{
 			}
 		}
 		return false;
+	}
+	// adds a Pawn for each Piece next to the King, unless you've allowed it only 1 open space. In which case you should lose a lot of points
+	/**
+	 * 
+	 * @param board
+	 * @return a value based on how well protected the king is. You should also be heavily docked points of leaving the King only one place to move
+	 */
+	private int getKingProtectionValue(Board board) {
+		int value = 0;
+		byte kingPos;
+		Colour mine;
+		PieceListNode[] boardArray = board.getBoardArray();
+		mine = board.getThisPlayer();
+		if (mine == Colour.WHITE){
+			kingPos = board.getWhiteKingPos();
+		}
+		else{
+			kingPos = board.getBlackKingPos();
+		}
+		if(board.inRange((byte) (kingPos + 15))){
+			if(!(boardArray[(byte) kingPos + 15] == null)){
+				if(boardArray[(byte) kingPos + 15].getPiece().getColour() == mine){
+					value += (pawnValue/10);
+				}
+			}
+			value += (pawnValue/10); //against side of board. Still good
+		}
+		if(board.inRange((byte) (kingPos - 15))){
+			if(!(boardArray[(byte) kingPos - 15] == null)){
+				if(boardArray[(byte) kingPos - 15].getPiece().getColour() == mine){
+					value += (pawnValue/10);
+				}
+			}
+			value += (pawnValue/10); //against side of board. Still good
+		}
+		if(board.inRange((byte) (kingPos + 16))){
+			if(!(boardArray[(byte) kingPos + 16] == null)){
+				if(boardArray[(byte) kingPos + 16].getPiece().getColour() == mine){
+					value += (pawnValue/10);
+				}
+			}
+			value += (pawnValue/10); //against side of board. Still good
+		}
+		if(board.inRange((byte) (kingPos - 16))){
+			if(!(boardArray[(byte) kingPos - 16] == null)){
+				if(boardArray[(byte) kingPos - 16].getPiece().getColour() == mine){
+					value += (pawnValue/10);
+				}
+			}
+			value += (pawnValue/10); //against side of board. Still good
+		}
+		if(board.inRange((byte) (kingPos + 17))){
+			if(!(boardArray[(byte) kingPos + 17] == null)){
+				if(boardArray[(byte) kingPos + 17].getPiece().getColour() == mine){
+					value += (pawnValue/10);
+				}
+			}
+			value += (pawnValue/10); //against side of board. Still good
+		}
+		if(board.inRange((byte) (kingPos - 17))){
+			if(!(boardArray[(byte) kingPos - 17] == null)){
+				if(boardArray[(byte) kingPos - 17].getPiece().getColour() == mine){
+					value += (pawnValue/10);
+				}
+			}
+			value += (pawnValue/10); //against side of board. Still good
+		}
+		if(board.inRange((byte) (kingPos + 1))){
+			if(!(boardArray[(byte) kingPos + 1] == null)){
+				if(boardArray[(byte) kingPos + 1].getPiece().getColour() == mine){
+					value += (pawnValue/10);
+				}
+			}
+			value += (pawnValue/10); //against side of board. Still good
+		}
+		if(board.inRange((byte) (kingPos - 1))){
+			if(!(boardArray[(byte) kingPos - 1] == null)){
+				if(boardArray[(byte) kingPos - 1].getPiece().getColour() == mine){
+					value += (pawnValue/10);
+				}
+			}
+			value += (pawnValue/10); //against side of board. Still good
+		}
+		return value;
 	}
 }
 
