@@ -54,17 +54,17 @@ public class Game {
 	}
 
 	public void run() {
-		
+
 		CommandUI ui = new CommandUI();
 		int turn = 0;
 		boolean gameOver = false;
 		ui.displayBoard(gameBoard.getPieces());
 		while(!gameOver) {
-			
+
 			LinkedList<Move> legalMoves = gameBoard.generateMoves();
 			if(legalMoves.isEmpty()) gameOver = true;
 			else {
-				
+
 				Move move = null;
 
 				if(players[turn] instanceof Human) {
@@ -80,9 +80,15 @@ public class Game {
 					}
 				}
 				else {
-					
+					long start = 0;
+					long end = 0;
+
+					start = System.currentTimeMillis();
 					move = ((AI)players[turn]).makeMove(this);
 					System.out.println(move);
+					end = System.currentTimeMillis();
+					long result = end - start;
+					System.out.println(result);
 				}
 				gameBoard.makeMove(move);
 				ui.displayBoard(gameBoard.getPieces());
@@ -91,11 +97,11 @@ public class Game {
 			}
 		}
 		if(gameBoard.inCheck((turn == 0) ? Colour.WHITE : Colour.BLACK)) {
-			
+
 			ui.displayWinner((turn + 1) % 2);
 		}
 		else {
-			
+
 			ui.displayStalemate();
 		}
 	}

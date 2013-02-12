@@ -138,7 +138,6 @@ public class Board {
 	 * @param - Move m
 	 */
 	public void makeMove(Move m) {
-
 		tryMove(m);
 	}
 

@@ -24,7 +24,7 @@ public class AI extends Player{
 	private static final int knightValue = 30;
 	private static final int queenValue = 90;
 
-	private static final int maxDepth = 4;
+	private static final int maxDepth = 5;
 
 	// Need value >= to absolute value of any position. Cannot use Integer.MAX_VALUE because we need 
 	// to be able to negate it and negate the negation.
@@ -339,12 +339,12 @@ public class AI extends Player{
 			 * Central Control
 			 */
 			value += centerControl(pos, node.getPiece(), b);
+			
 			/*
 			 * Wider centre control
 			 */
-			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
-				value += (pawnValue/10);
-			}
+			value += widerControl(node.getPiece().getPosition(), b);
+			
 			/*
 			 * Gains points for restricting opposing King movement
 			 */
@@ -356,12 +356,12 @@ public class AI extends Player{
 			 * Central Control
 			 */
 			value += centerControl(pos, node.getPiece(), b);
+			
 			/*
 			 * Wider centre control
 			 */
-			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
-				value += (pawnValue/10);
-			}
+			value += widerControl(node.getPiece().getPosition(), b);
+			
 			// +50% of pawnScore for saving Rook till after two other minor pieces have moved
 			if ((!node.getPiece().hasMoved()) && b.getMinorDeveloped() <= 2){
 				value += (pawnValue/2);
@@ -376,12 +376,12 @@ public class AI extends Player{
 			 * Central control
 			 */
 			value += centerControl(pos, node.getPiece(), b);
+			
 			/*
 			 * Wider centre control
 			 */
-			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
-				value += (pawnValue/10);
-			}
+			value += widerControl(node.getPiece().getPosition(), b);
+			
 			/*
 			 * Gains points for restricting opposing King movement
 			 */
@@ -392,12 +392,11 @@ public class AI extends Player{
 			 * Central control
 			 */
 			value += centerControl(pos, node.getPiece(), b);
+			
 			/*
 			 * Wider centre control
 			 */
-			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
-				value += (pawnValue/10);
-			}
+			value += widerControl(node.getPiece().getPosition(), b);
 
 			// 20% of pawnScore for developing knight before bishop
 			if (!node.getPiece().hasMoved()){
@@ -413,12 +412,12 @@ public class AI extends Player{
 			 * Central control
 			 */
 			value += centerControl(pos, node.getPiece(), b);
+			
 			/*
 			 * Wider centre control
 			 */
-			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
-				value += (pawnValue/10);
-			}
+			value += widerControl(node.getPiece().getPosition(), b);
+			
 			// +33% of pawnScore for saving Queen till after two other minor pieces have moved
 			if ((!node.getPiece().hasMoved()) && b.getMinorDeveloped() < 3){
 				value += (pawnValue/3);
@@ -491,12 +490,12 @@ public class AI extends Player{
 			 * Central control
 			 */
 			value += centerControl(pos, node.getPiece(), b);
+			
 			/*
 			 * Wider centre control
 			 */
-			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
-				value += (pawnValue/10);
-			}
+			value += widerControl(node.getPiece().getPosition(), b);
+			
 			/*
 			 * Gains points for restricting opposing King movement
 			 */
@@ -508,12 +507,12 @@ public class AI extends Player{
 			 * Central control
 			 */
 			value += centerControl(pos, node.getPiece(), b);
+			
 			/*
 			 * Wider centre control
 			 */
-			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
-				value += (pawnValue/10);
-			}
+			value += widerControl(node.getPiece().getPosition(), b);
+			
 			// +50% of pawnScore for saving Rook till after two other minor pieces have moved
 			if ((!node.getPiece().hasMoved()) && b.getMinorDeveloped() <= 2){
 				value += (pawnValue/2);
@@ -528,12 +527,12 @@ public class AI extends Player{
 			 * Central control
 			 */
 			value += centerControl(pos, node.getPiece(), b);
+			
 			/*
 			 * Wider centre control
 			 */
-			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
-				value += (pawnValue/10);
-			}
+			value += widerControl(node.getPiece().getPosition(), b);
+			
 			/*
 			 * Gains points for restricting opposing King movement
 			 */
@@ -548,9 +547,8 @@ public class AI extends Player{
 			/*
 			 * Wider centre control
 			 */
-			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
-				value += (pawnValue/10);
-			}
+			value += widerControl(node.getPiece().getPosition(), b);
+			
 			// 20% of pawnScore for developing knight before bishop
 			if (!node.getPiece().hasMoved()){
 				value += getKnightOrderScore(b.getBlacksList());
@@ -571,9 +569,7 @@ public class AI extends Player{
 			/*
 			 * Wider centre control
 			 */
-			if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
-				value += (pawnValue/10);
-			}
+			value += widerControl(node.getPiece().getPosition(), b);
 			// +33% of pawnScore for saving Queen till after two other minor pieces have moved
 			if ((!node.getPiece().hasMoved()) && b.getMinorDeveloped() < 3){
 				value += (pawnValue/3);	
@@ -629,6 +625,13 @@ public class AI extends Player{
 			value += (pawnValue/10);
 		}
 		return value;
+	}
+	
+	public int widerControl(byte pos, Board board){
+		if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
+			return (pawnValue/10);
+		}
+		return 0;
 	}
 
 	/**
@@ -835,7 +838,7 @@ public class AI extends Player{
 	/**
 	 * 
 	 * @param board
-	 * @return value based off of how many pieces are next to, or can attack the squares next to the enemy king
+	 * @return value based off of how many pieces are next to
 	 * Virtually the same code as getKingProtection. Could this be changed?
 	 */ 
 	private int getKingAttack(Board board){
