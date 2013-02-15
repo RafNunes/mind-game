@@ -35,6 +35,7 @@ public class AI extends Player{
 		public int passedPawnBonus;
 		public int kingOnBackRowDuringMiddleGame; // not relevant during end game
 		public int kingClearSideDuringMiddleGame; // not relevant during end game
+		public int kingNearSideDuringMiddleGame; // not relevant during end game
 		public int kingPawnGuardBonus; // not relevant during end game
 		public int kingInInnerCentreDuringEndGame; // not relevant during middle game
 		public int kingInOuterCentreDuringEndGame; // not relevant during middle game
@@ -651,13 +652,18 @@ public class AI extends Player{
 
 		int kingCol = kingPos & 7;
 		int kingRow = kingPos >> 4;
-		if(kingRow == backRow) value += currentValues.kingOnBackRowDuringMiddleGame;
 
 		byte towardsSide;
 		if(kingCol <= 3) towardsSide = -1;
 		else towardsSide = 1;
 
-		// check that squares between king and side are empty
+		// assign bonus for being on back row
+		if(kingRow == backRow) value += currentValues.kingOnBackRowDuringMiddleGame;
+
+		// assign bonus for being near the side
+		if(kingCol <= 1 || kingCol >= 6) value += currentValues.kingClearSideDuringMiddleGame;
+
+		// check wether squares between king and side are empty
 		boolean empty = true;
 		for(byte nextSquare = (byte)(towardsSide + kingPos); (nextSquare & 0x88) == 0; nextSquare += towardsSide) {
 
@@ -669,13 +675,11 @@ public class AI extends Player{
 		}
 		if(empty) {
 
-			value += currentValues.kingClearSideDuringMiddleGame;
+			value += currentValues.kingNearSideDuringMiddleGame;
 		}
 
-		if(kingCol <= 1 || kingCol >= 6) value += currentValues.kingClearSideDuringMiddleGame;
-
-		// now check for pawns in front of king
-		if(kingRow != finalRow) {
+		// now check for pawns in front of king. Only check if king is on one of back two rows.
+		if(kingRow == backRow || (kingRow - forwards) == backRow) {
 
 			Piece forwardOne = b.getPieceAt((byte)(kingPos + forwards));
 			if(forwardOne != null && forwardOne.getColour() == c && forwardOne.getType() == Piece.Type.PAWN) {
@@ -726,6 +730,7 @@ public class AI extends Player{
 
 		return value;
 	}
+
 	
 	// for use during end game only
 	int evaluateKingMobility(Board b, Colour c) {
