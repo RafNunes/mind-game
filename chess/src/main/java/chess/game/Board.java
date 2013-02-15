@@ -70,23 +70,23 @@ public class Board {
 	 * Getters
 	 * 
 	 */
-	
+
 	public PieceListNode[] getBoardArray(){
 		return boardArray;
 	}
-    
+
 	public int getMinorDeveloped(){
 		return minorDeveloped;
 	}
-	
+
 	public byte getBlackKingPos(){
 		return blackKingPos;
 	}
-	
+
 	public byte getWhiteKingPos(){
 		return whiteKingPos;
 	}
-	
+
 	/**
 	 * @return - LinkedList<Piece> containing all of the pieces on the board
 	 */
@@ -117,7 +117,7 @@ public class Board {
 	public PieceList getBlacksList(){
 		return blacksPieceList;
 	}
-	
+
 	public PieceList getMyList(){
 		if (thisPlayer == Colour.WHITE){
 			return whitesPieceList;
@@ -142,13 +142,13 @@ public class Board {
 	 * @param - Move m
 	 */
 	public void tryMove(Move m) {
-		
+
 		Piece currentP = boardArray[m.getStartpos()].getPiece();
-		
+
 		if(currentP.getType() == Piece.Type.KNIGHT || currentP.getType() == Piece.Type.BISHOP){
 			minorDeveloped++;
 		}
-			
+
 
 		if(boardArray[m.getEndpos()] != null) {
 
@@ -203,7 +203,7 @@ public class Board {
 	 * reverts the state of the board and pieces to how they were before the most recent move was made.
 	 */
 	public void undoMove() {
-		
+
 		Colour temp = thisPlayer;
 		thisPlayer = getOtherPlayer();
 		setOtherPlayer(temp);
@@ -211,11 +211,11 @@ public class Board {
 		boardArray[m.getStartpos()] = boardArray[m.getEndpos()];
 		boardArray[m.getStartpos()].getPiece().setPosition(m.getStartpos());		
 		if(m.getFirstTimeMoving()) boardArray[m.getStartpos()].getPiece().setHasMoved(false);
-		
+
 		if( boardArray[m.getStartpos()].getPiece().getType() == Piece.Type.KNIGHT ||  boardArray[m.getStartpos()].getPiece().getType() == Piece.Type.BISHOP){
 			minorDeveloped--;
 		}
-		
+
 		if(boardArray[m.getStartpos()].getPiece() instanceof Pawn) {
 
 			// set hasMoved to false if starting position == current position
@@ -615,7 +615,7 @@ public class Board {
 
 		return moves;
 	}
-	
+
 	public boolean inRange (byte pos){
 		return((pos & 0x88) == 0 && pos < (byte)120);
 	}
@@ -629,68 +629,68 @@ public class Board {
 	}
 
 	public boolean isLeftCastlePossible(Colour c) {
-		
+
 		byte kingPos;
 		if(c == Colour.WHITE) {
-			
+
 			kingPos = whiteKingPos;
 		}
 		else {
-			
+
 			kingPos = blackKingPos;
 		}
-		
+
 		Piece king = boardArray[kingPos].getPiece();
 		if(!king.hasMoved()) {
-			
+
 			// check whether left rook is unmoved
 			if((boardArray[kingPos - 4] != null) && 
 					(boardArray[kingPos - 4].getPiece().getType() == Piece.Type.ROOK) &&
 					(!boardArray[kingPos - 4].getPiece().hasMoved())) {
-				
+
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	public boolean isRightCastlePossible(Colour c) {
-		
+
 		byte kingPos;
 		if(c == Colour.WHITE) {
-			
+
 			kingPos = whiteKingPos;
 		}
 		else {
-			
+
 			kingPos = blackKingPos;
 		}
-		
+
 		Piece king = boardArray[kingPos].getPiece();
 		if(!king.hasMoved()) {
-			
+
 			// check whether right rook is unmoved
 			if((boardArray[kingPos + 3] != null) && 
 					(boardArray[kingPos + 3].getPiece().getType() == Piece.Type.ROOK) &&
 					(!boardArray[kingPos + 3].getPiece().hasMoved())) {
-				
+
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	public LinkedList<Piece> getPiecesAttackingSquare(byte square) {
-		
+
 		LinkedList<Piece> attackingPieces = new LinkedList<Piece>();
-		
+
 		// check for attacking stepping pieces
 		for(byte dir : NonPawn.getKnightDir()) {
 
 			if(((byte)(square + dir) & 0x88) == 0) {
 
 				if(boardArray[square + dir] != null && boardArray[square + dir].getPiece().getType() == Piece.Type.KNIGHT) {
-					
+
 					attackingPieces.add(boardArray[square + dir].getPiece());
 				}
 			}
@@ -700,12 +700,12 @@ public class Board {
 			if(((byte)(square + dir) & 0x88) == 0) {
 
 				if(boardArray[square + dir] != null && boardArray[square + dir].getPiece().getType() == Piece.Type.KING) {
-					
+
 					attackingPieces.add(boardArray[square + dir].getPiece());
 				}
 			}
 		}
-		
+
 		// check for attacking sliding pieces
 		byte[][] dirSets = new byte[2][];
 		dirSets[0] = NonPawn.getRookDir();
@@ -736,7 +736,7 @@ public class Board {
 
 							if((boardArray[nextPosition].getPiece().getType() == dangerType ||
 									boardArray[nextPosition].getPiece().getType() == Piece.Type.QUEEN)) {
-								
+
 								attackingPieces.add(boardArray[nextPosition].getPiece());
 							}
 
@@ -750,7 +750,7 @@ public class Board {
 				}
 			}
 		}
-		
+
 		// check for attacking white pawns
 		byte[] dirs = Pawn.getCaptureDirs(Colour.WHITE);
 		for(byte dir : dirs) {
@@ -759,7 +759,7 @@ public class Board {
 			if(((byte)(newPosition) & 0x88) == 0) {
 
 				if(boardArray[newPosition] != null && boardArray[newPosition].getPiece().getType() == Piece.Type.PAWN) {
-					
+
 					attackingPieces.add(boardArray[newPosition].getPiece());
 				}
 			}
@@ -778,18 +778,18 @@ public class Board {
 				}
 			}
 		}
-		
+
 		return attackingPieces;
 	}
-	
+
 	Piece getPieceAt(byte square) {
-		
-		if(boardArray[square] != null) {
-			
-			return boardArray[square].getPiece();
+			if(boardArray[square] != null) {
+
+				return boardArray[square].getPiece();
+			}
+			else return null;
 		}
-		else return null;
-	}
+
 }
 
 

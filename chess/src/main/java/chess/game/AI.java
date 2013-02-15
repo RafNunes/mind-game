@@ -627,97 +627,103 @@ public class AI extends Player{
 
 	// For use during early/mid game only
 	int evaluateKingSafety(Board b, Colour c) {
-		
+
 		int backRow;
+		int finalRow;
 		int forwards;
 		byte kingPos;
 		if(c == Colour.WHITE) {
-			
+
 			backRow = 0;
+			finalRow = 7;
 			forwards = 16;
 			kingPos = b.getWhiteKingPos();
 		}
 		else {
-			
+
 			backRow = 7;
+			finalRow = 0;
 			forwards = -16;
 			kingPos = b.getBlackKingPos();
 		}
-		
+
 		int value = 0;
-		
+
 		int kingCol = kingPos & 7;
 		int kingRow = kingPos >> 4;
 		if(kingRow == backRow) value += currentValues.kingOnBackRowDuringMiddleGame;
-		
+
 		byte towardsSide;
 		if(kingCol <= 3) towardsSide = -1;
 		else towardsSide = 1;
-		
+
 		// check that squares between king and side are empty
 		boolean empty = true;
 		for(byte nextSquare = (byte)(towardsSide + kingPos); (nextSquare & 0x88) == 0; nextSquare += towardsSide) {
-			
+
 			if(b.getPieceAt(nextSquare) != null) {
-				
+
 				empty = false;
 				break;
 			}
 		}
 		if(empty) {
-			
+
 			value += currentValues.kingClearSideDuringMiddleGame;
 		}
-		
+
 		if(kingCol <= 1 || kingCol >= 6) value += currentValues.kingClearSideDuringMiddleGame;
-		
+
 		// now check for pawns in front of king
-		Piece forwardOne = b.getPieceAt((byte)(kingPos + forwards));
-		if(forwardOne != null && forwardOne.getColour() == c && forwardOne.getType() == Piece.Type.PAWN) {
-			
-			value += currentValues.kingPawnGuardBonus;
-		}
-		if(kingCol != 0) {
-			
-			Piece forwardLeft = b.getPieceAt((byte)(kingPos + forwards - 1));
-			if(forwardLeft != null && forwardLeft.getColour() == c && forwardLeft.getType() == Piece.Type.PAWN) {
+		if(kingRow != finalRow) {
+
+			Piece forwardOne = b.getPieceAt((byte)(kingPos + forwards));
+			if(forwardOne != null && forwardOne.getColour() == c && forwardOne.getType() == Piece.Type.PAWN) {
 
 				value += currentValues.kingPawnGuardBonus;
 			}
-		}
-		if(kingCol != 7) {
-			
-			Piece forwardRight = b.getPieceAt((byte)(kingPos + forwards + 1));
-			if(forwardRight != null && forwardRight.getColour() == c && forwardRight.getType() == Piece.Type.PAWN) {
+			if(kingCol != 0) {
 
-				value += currentValues.kingPawnGuardBonus;
+				Piece forwardLeft = b.getPieceAt((byte)(kingPos + forwards - 1));
+				if(forwardLeft != null && forwardLeft.getColour() == c && forwardLeft.getType() == Piece.Type.PAWN) {
+
+					value += currentValues.kingPawnGuardBonus;
+				}
+			}
+			if(kingCol != 7) {
+
+				Piece forwardRight = b.getPieceAt((byte)(kingPos + forwards + 1));
+				if(forwardRight != null && forwardRight.getColour() == c && forwardRight.getType() == Piece.Type.PAWN) {
+
+					value += currentValues.kingPawnGuardBonus;
+				}
 			}
 		}
-		
+
 		// now check for pieces attacking squares around king
 		byte[] squaresAroundKing = new byte[] {	(byte) (kingPos + 15), (byte) (kingPos + 16), (byte) (kingPos + 17),
-												(byte) (kingPos -  1), 		/* kingPos */ 	  (byte) (kingPos + 1),
-												(byte) (kingPos - 17), (byte) (kingPos - 16), (byte) (kingPos - 15)};
-		
+							(byte) (kingPos -  1), 		/* kingPos */ 	  (byte) (kingPos + 1),
+							(byte) (kingPos - 17), (byte) (kingPos - 16), (byte) (kingPos - 15)};
+
 		for(byte square : squaresAroundKing) {
-			
+
 			if((square & 0x88) == 0) {
-				
+
 				LinkedList<Piece> piecesAttackingSquare = b.getPiecesAttackingSquare(square);
 				for(Piece p : piecesAttackingSquare) {
-					
+
 					if(p.getColour() == c) {
-						
+
 						value += currentValues.bonusForDefendingSquareByKing;
 					}
 					else {
-						
+
 						value += currentValues.penaltyForOpponentAttackingSquareByKing;
 					}
 				}
 			}
 		}
-		
+
 		return value;
 	}
 	
