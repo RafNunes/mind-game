@@ -5,39 +5,42 @@ import java.util.Comparator;
 import java.util.LinkedList;
 
 import chess.piece.*;
-import chess.piece.Piece.Type;
 import chess.util.Colour;
 
 
 /**
  * 
- * @author craigmartin
- * Edited to add several new features to improve evaluation.
+ * @author Craig Martin, Demian Till
  * 
  */
 
 public class AI extends Player{
-
-	private static final int pawnValue = 10;
-	private static final int rookValue = 50;
-	private static final int bishopValue = 30;
-	private static final int knightValue = 30;
-	private static final int queenValue = 90;
-
-	private static final int maxDepth = 5;
-
-	// Need value >= to absolute value of any position. Cannot use Integer.MAX_VALUE because we need 
-	// to be able to negate it and negate the negation.
-	private static final int maxVal = 999999999;
-
-	/**
-	 * Used for King position evaluation
-	 */
-
-	private boolean middlegame = false;
-	private boolean endgame = false;
-
-
+	
+	private class Values {
+		
+		public int pawn;
+		public int rook;
+		public int bishop;
+		public int knight;
+		public int queen;
+		public int valuePerAvailableMove;
+		public int valueForPotentialCastle; // will get this twice if king can still castle on both sides
+		public int valueForAttackingInnerCenralSquare;
+		public int valueForAttackingOuterCenralSquare;
+		public int valueForOccupyingInnerCentralSquare;
+		public int valueForOccupyingOuterCentralSquare;
+		public int sidePawnPenalty;
+		public int doubledPawnPenalty;
+		public int isolatedPawnPenalty;
+		public int passedPawnBonus;
+		public int kingOnBackRowDuringMiddleGame; // not relevant during end game
+		public int kingClearSideDuringMiddleGame; // not relevant during end game
+		public int kingPawnGuardBonus; // not relevant during end game
+		public int kingInInnerCentreDuringEndGame; // not relevant during middle game
+		public int kingInOuterCentreDuringEndGame; // not relevant during middle game
+		public int penaltyForOpponentAttackingSquareByKing;
+		public int bonusForDefendingSquareByKing;
+	}
 
 
 	private class MoveValuePair {
@@ -49,7 +52,7 @@ public class AI extends Player{
 		public int value;
 	}
 
-	public class MoveValuePairComparator implements Comparator<MoveValuePair> {
+	private class MoveValuePairComparator implements Comparator<MoveValuePair> {
 
 		public int compare(MoveValuePair mvp1, MoveValuePair mvp2) {
 
@@ -59,10 +62,138 @@ public class AI extends Player{
 		}
 	}
 
-	public Move makeMove(Game game) {
+	private static final int pawnValue = 10;
+	private static final int rookValue = 50;
+	private static final int bishopValue = 30;
+	private static final int knightValue = 30;
+	private static final int queenValue = 90;
 
-		MoveValuePair pair = getBestMove(game.getBoard(), 0, maxVal);
-		return pair.move;
+	// Need value >= to absolute value of any position. Cannot use Integer.MAX_VALUE because we need 
+	// to be able to negate it and negate the negation.
+	private static final int maxVal = 999999999;
+
+	private int maxDepth;
+	
+	// if the total value of the material on the board is less than this then we are in the end game
+	private static final int middleGameMinValue = 15;
+	
+	private Values midGameValues;
+	private Values endGameValues;
+	private Values currentValues;
+	
+	// first depth we search to for ordering the moves to help alpha-beta make the full depth search quicker 
+	private int gaugingDepth = 4;
+	
+	private int fullDepth = 5;
+	private int fullDepthWidth = -1; // '-1' to consider all possible moves
+
+	public AI() {
+		
+		midGameValues = new Values();
+		midGameValues.pawn = 100;
+		midGameValues.rook = 500;
+		midGameValues.knight = 300;
+		midGameValues.bishop = 300;
+		midGameValues.queen = 900;
+		midGameValues.valueForAttackingInnerCenralSquare = 7;
+		midGameValues.valueForAttackingOuterCenralSquare = 3;
+		midGameValues.valueForOccupyingInnerCentralSquare = 7;
+		midGameValues.valueForOccupyingOuterCentralSquare = 3;
+		midGameValues.valueForPotentialCastle = 20;
+		midGameValues.valuePerAvailableMove = 6;
+		midGameValues.kingOnBackRowDuringMiddleGame = 20;
+		midGameValues.kingClearSideDuringMiddleGame = 20;
+		midGameValues.kingPawnGuardBonus = 20;
+		midGameValues.penaltyForOpponentAttackingSquareByKing = -10;
+		midGameValues.bonusForDefendingSquareByKing = 6;
+		midGameValues.sidePawnPenalty = -30;
+		midGameValues.doubledPawnPenalty = -20;
+		midGameValues.isolatedPawnPenalty = 10;
+		midGameValues.passedPawnBonus = 40;
+		
+		
+		endGameValues = new Values();
+		endGameValues.pawn = 100;
+		endGameValues.rook = 500;
+		endGameValues.knight = 300;
+		endGameValues.bishop = 300;
+		endGameValues.queen = 900;
+		endGameValues.valueForAttackingInnerCenralSquare = 7;
+		endGameValues.valueForAttackingOuterCenralSquare = 3;
+		endGameValues.valueForOccupyingInnerCentralSquare = 7;
+		endGameValues.valueForOccupyingOuterCentralSquare = 3;
+		endGameValues.valueForPotentialCastle = 20;
+		endGameValues.valuePerAvailableMove = 6;
+		endGameValues.penaltyForOpponentAttackingSquareByKing = -10;
+		endGameValues.bonusForDefendingSquareByKing = 6;
+		endGameValues.sidePawnPenalty = -30;
+		endGameValues.doubledPawnPenalty = -20;
+		endGameValues.isolatedPawnPenalty = 10;
+		endGameValues.passedPawnBonus = 40;
+		endGameValues.kingInInnerCentreDuringEndGame = 40;
+		endGameValues.kingInOuterCentreDuringEndGame = 30;
+		
+		currentValues = midGameValues;
+	}
+
+	public Move makeMove(Game game) {
+		
+		Board board = game.getBoard();
+		
+		LinkedList<Move> moves = board.generateMoves();
+		
+		if(moves.isEmpty()) return null;
+
+		// make a MoveValuePair for each move
+		LinkedList<MoveValuePair> moveValuePairs = new LinkedList<MoveValuePair>();
+		for(Move m : moves) {
+			
+			moveValuePairs.add(new MoveValuePair(m, 0)); // this value will not be used
+		}
+		
+		// assign each a value based on a depth 4 evaluation
+		maxDepth = gaugingDepth;
+		for(MoveValuePair mvp : moveValuePairs) {
+			
+			board.tryMove(mvp.move);
+			MoveValuePair bestCounter = getBestMove(board, 1, maxVal);
+			board.undoMove();
+			mvp.value = - bestCounter.value;
+		}
+		
+		// sort based on these values to help alpha-beta pruning when we do the next search
+		Collections.sort(moveValuePairs, new MoveValuePairComparator());
+		
+		// narrow the search down to the n most promising.
+		int width;
+		if(fullDepthWidth == -1) width = moveValuePairs.size();
+		else width = fullDepthWidth;
+		LinkedList<MoveValuePair> bestPairs = new LinkedList<MoveValuePair>();
+		for(int i = 0; i < width; i++) {
+			
+			bestPairs.addLast(moveValuePairs.get(i));
+		}
+		
+		maxDepth = fullDepth;
+		
+		// this will be overridden unless all moves happen to have value -maxVal
+		MoveValuePair bestPair = new MoveValuePair(moves.getFirst(), -maxVal);
+		
+		for(MoveValuePair mvp : bestPairs) {
+			
+			board.tryMove(mvp.move);
+			MoveValuePair bestCounter = getBestMove(board, 1, -bestPair.value);
+			board.undoMove();
+			
+			// if the best counter that the opponent can make to this move is better for us then the previously best move
+			// that we could make, then store this move as the best move that we can make.
+			if(-bestCounter.value > bestPair.value) {
+
+				bestPair = new MoveValuePair(mvp.move, -bestCounter.value);
+			}
+		}
+		
+		return bestPair.move;
 	}
 
 	// returns the best move from the current position from the perspective of the player whose
@@ -72,7 +203,7 @@ public class AI extends Player{
 
 		if(currentDepth >= maxDepth) {
 
-			int value = evaluateBoard(board);
+			int value = evaluate(board);
 			return new MoveValuePair(null, value);
 		}
 		else {
@@ -102,6 +233,11 @@ public class AI extends Player{
 							break;
 						}
 					}
+					
+//					board.tryMove(m);
+//					int value = -evaluate(board); // '-' because from opponents perspective
+//					board.undoMove();
+					
 					moveValuePairs.add(new MoveValuePair(m, value));
 				}
 				Collections.sort(moveValuePairs, new MoveValuePairComparator());
@@ -132,890 +268,487 @@ public class AI extends Player{
 			}
 		}
 	}
-	// currently the value is calculated from scratch every time, can we carry this across?
+	
 	// evaluates the board from the perspective of whoever's turn it is based on the current state of the board.
-	private int evaluateBoard(Board board) {
-		int total;
+	public int evaluate(Board b) {
+		
+		int whitesMaterial = getMaterial(b, Colour.WHITE);
+		int blacksMaterial = getMaterial(b, Colour.BLACK);
+		
+		int totalMaterial = whitesMaterial + blacksMaterial;
+		if(totalMaterial > middleGameMinValue) currentValues = midGameValues;
+		else currentValues = endGameValues;
+		
 		int value = 0;
-
-		//check for middle game/ end game
-
-		if (!middlegame){
-			if (board.getHasCastled() && board.getMinorDeveloped() > 2){
-				middlegame = true;
-			}
-		}
-		else{
-			if (!endgame){
-				total = getMaterialBasic(board);
-				if (total < 15){
-					endgame = true;
-					middlegame = false;
-				}
-			}
-		}
-
-		// Assigns points material difference. Low cost & MUST
-		// Based on Pawn Protection, center control, int values and development order
-		value += getDifference(board);
-
-		//Assigns points for available moves. High cost & should
-		if (middlegame || endgame){
-			value += getMovesValue(board);
-		}
-
-
-		//Assigns points based on how well protected the King is in start game/middle game
-		if(!endgame){
-			value += getKingProtectionValue(board);
-			//Detracts points if castled or unable to castle. However is balanced out by King protection
-			value += hasCastled(board);
-		}
-		else{
-			//Assign points for the Kings position in end game
-			getKingPos(board);
-		}
-
-		//Assigns points based on how many pieces are next to the enemy King, basically the opposite of getKingProtection
-		value += getKingAttack(board);
-
-
-		//Assigns points for the Kings mobility, essential to stop the king from putting itself in check or something silly like that
-		value += getKingMobility(board);
-
-
-
-		return value;
-	}
-
-
-	/*
-	 * Creating functions for each evaluation. Keeps code separate
-	 *  + allows for easier reading
-	 *  + allows functions to be added/removed from evaluator without losing code 
-	 */
-
-
-	/**
-	 * 
-	 * @param b the board
-	 * @param c the colour to be checked
-	 * @return a value based on the basic values of the material. Used to collect end game info
-	 */
-	private int getMaterialBasic(Board b){
-
-		PieceList whitePieces = b.getWhitesList();
-		PieceList blackPieces = b.getBlacksList();
-		int value = 0;		
-
-
-		for(PieceListNode node : whitePieces) {
-			switch(node.getPiece().getType()) {
-
-			case PAWN: value += pawnValue;
-			break;
-
-			case ROOK: value += rookValue;
-			break;
-
-			case BISHOP: value += bishopValue;
-			break;
-
-			case KNIGHT: value += knightValue;
-			break;
-
-			case QUEEN: value += queenValue;
-			break;
-			default:
-			}
-		}
-		for(PieceListNode node : blackPieces) {
-			switch(node.getPiece().getType()) {
-
-			case PAWN: value += pawnValue;
-			break;
-
-			case ROOK: value += rookValue;
-			break;
-
-			case BISHOP: value += bishopValue;
-			break;
-
-			case KNIGHT: value += knightValue;
-			break;
-
-			case QUEEN: value += queenValue;
-			break;
-			default:
-			}
-		}
-		return value;
-	}
-
-
-
-	/**
-	 * Gets the material difference. Low cost, essential for basic decision making
-	 * @param board
-	 * @return
-	 */
-	protected  int getDifference(Board board){
-		if(board.getThisPlayer() == Colour.WHITE) {
-
-			return getMaterialTotalWhite(board) - getMaterialTotalBlack(board);
+		Colour ourColour = b.getThisPlayer();
+		Colour theirColour = b.getOtherPlayer();
+		
+		// consider material value
+		if(ourColour == Colour.WHITE) {
+			
+			value += whitesMaterial - blacksMaterial;
 		}
 		else {
-
-			return getMaterialTotalBlack(board) - getMaterialTotalWhite(board);
+			
+			value += blacksMaterial - whitesMaterial;
 		}
-	}
+		
+		// consider num available moves
+		value += b.generateMoves().size() * currentValues.valuePerAvailableMove;
+		value -= b.generateMovesFromOpponentsPerspective().size() * currentValues.valuePerAvailableMove;
+		
+		// consider whether or not castling is still a possibility
+		if(b.isLeftCastlePossible(ourColour)) value += currentValues.valueForPotentialCastle;
+		if(b.isRightCastlePossible(ourColour)) value += currentValues.valueForPotentialCastle;
+		if(b.isLeftCastlePossible(theirColour)) value -= currentValues.valueForPotentialCastle;
+		if(b.isRightCastlePossible(theirColour)) value -= currentValues.valueForPotentialCastle;
+		
+		// consider pieces attacking central squares
+		value += evaluateCentralControl(b);
+		
+		// consider pawn structure
+		value += evaluatePawnStructure(b);
 
-
-
-	/**
-	 * Get the number of available moves. High cost, difficult for exact numbers, should have
-	 * @param board
-	 * @return
-	 */
-	protected int getMovesValue(Board board){
-		// suppose each available move is worth 0.2 pawns
-		return board.generateMoves().size() * (pawnValue/10 * 2) - board.generateMovesFromOpponentsPerspective().size() * (pawnValue/10 *2); // pawn is worth 10 
-	}
-
-
-
-
-	/**
-	 * Created by Craig Martin 
-	 * @param Board b
-	 * @return a value based on several things:
-	 * Basic Piece Value
-	 * Pawn Protection
-	 * Pawn promotion
-	 * Central Control
-	 * Wider Central Control
-	 * King attack ability
-	 * 
-	 * Numbers for central control provided by David McKenna
-	 */                            
-
-	private int getMaterialTotalWhite(Board b){
-
-		int value = 0;
-		PieceList pieces = b.getWhitesList();
-		PieceListNode[] boardArray = b.getBoardArray();
-
-		for(PieceListNode node : pieces) {
-			byte pos = node.getPiece().getPosition();
-			switch(node.getPiece().getType()) {
-			case PAWN: value += pawnValue;
-			if ((pos % 16) == 0 || node.getPiece().getPosition() % (byte)16 == 7){
-				value -= (pawnValue /100) * 15;
-			}
-			if ((pos > (byte)79)){
-				value += (pawnValue/10); //temp value - must confirm with David Watt
-			}
-			if ((pos > (byte)95)){
-				value += (pawnValue/10); //temp value -must confirm with David Watt
-			}
-			/*
-			 * Pawn Protection
-			 */
-			if (b.inRange((byte)(pos - 17))){
-				if(!(boardArray[(byte) pos - 17]== null)){
-					if(boardArray[(byte) pos - 17].getPiece().getType() == Type.PAWN){
-						value += (pawnValue/10);
-					}
-				}
-			}
-			if (b.inRange((byte)(pos - 15))){
-				if(!(boardArray[(byte) pos - 15] == null)){
-					if(boardArray[(byte) pos - 15].getPiece().getType() == Type.PAWN){
-						value += (pawnValue/10);
-					}
-				}
-			}
-			/*
-			 * Central Control
-			 */
-			value += centerControl(pos, node.getPiece(), b);
+		if(currentValues == midGameValues) {
 			
-			/*
-			 * Wider centre control
-			 */
-			value += widerControl(node.getPiece().getPosition(), b);
-			
-			/*
-			 * Gains points for restricting opposing King movement
-			 */
-			value += getKingAttack(b, node.getPiece(),Colour.WHITE);
-
-			break;
-			case ROOK: value += rookValue;
-			/*
-			 * Central Control
-			 */
-			value += centerControl(pos, node.getPiece(), b);
-			
-			/*
-			 * Wider centre control
-			 */
-			value += widerControl(node.getPiece().getPosition(), b);
-			
-			// +50% of pawnScore for saving Rook till after two other minor pieces have moved
-			if ((!node.getPiece().hasMoved()) && b.getMinorDeveloped() <= 2){
-				value += (pawnValue/2);
-			}
-			/*
-			 * Gains points for restricting opposing King movement
-			 */
-			value += getKingAttack(b, node.getPiece(),Colour.WHITE);
-			break;
-			case BISHOP: value += bishopValue;
-			/*
-			 * Central control
-			 */
-			value += centerControl(pos, node.getPiece(), b);
-			
-			/*
-			 * Wider centre control
-			 */
-			value += widerControl(node.getPiece().getPosition(), b);
-			
-			/*
-			 * Gains points for restricting opposing King movement
-			 */
-			value += getKingAttack(b, node.getPiece(),Colour.WHITE);
-			break;
-			case KNIGHT: value += knightValue;
-			/*
-			 * Central control
-			 */
-			value += centerControl(pos, node.getPiece(), b);
-			
-			/*
-			 * Wider centre control
-			 */
-			value += widerControl(node.getPiece().getPosition(), b);
-
-			// 20% of pawnScore for developing knight before bishop
-			if (!node.getPiece().hasMoved()){
-				value += getKnightOrderScore(b.getWhitesList());
-			}
-			/*
-			 * Gains points for restricting opposing King movement
-			 */
-			value += getKingAttack(b, node.getPiece(),Colour.WHITE);
-			break;
-			case QUEEN: value += queenValue;
-			/*
-			 * Central control
-			 */
-			value += centerControl(pos, node.getPiece(), b);
-			
-			/*
-			 * Wider centre control
-			 */
-			value += widerControl(node.getPiece().getPosition(), b);
-			
-			// +33% of pawnScore for saving Queen till after two other minor pieces have moved
-			if ((!node.getPiece().hasMoved()) && b.getMinorDeveloped() < 3){
-				value += (pawnValue/3);
-			}
-			/*
-			 * Gains points for restricting opposing King movement
-			 */
-			value += getKingAttack(b, node.getPiece(),Colour.WHITE);
-			break;
-			default:
-
-
-			}
+			// consider king safety
+			value += evaluateKingSafety(b, ourColour);
+			value -= evaluateKingSafety(b, theirColour);
 		}
-		return value;
-	}
-
-
-
-
-	/**
-	 * Created by Craig Martin 
-	 * @param Board b
-	 * @return a value based on several things:
-	 * Basic Piece Value
-	 * Pawn Protection
-	 * Pawn promotion
-	 * Central Control
-	 * Wider Central Control
-	 * King attack ability
-	 * 
-	 * Numbers for central control provided by David McKenna
-	 */   
-	private int getMaterialTotalBlack(Board b){
-		int value = 0;
-		PieceList pieces = b.getBlacksList();
-		PieceListNode[] boardArray = b.getBoardArray();
-
-		for(PieceListNode node : pieces) {
-			byte pos = node.getPiece().getPosition();
-			switch(node.getPiece().getType()) {
-			case PAWN: value += pawnValue;
-			if ((pos % 16) == 0 || node.getPiece().getPosition() % (byte)16 == 7){
-				value -= (pawnValue /100) * 15;
-			}
-			if ((pos < (byte)39)){
-				value += (pawnValue/10); //temp value - must confirm with David Watt - must be extended to watch for blocking/attacking pieces
-			}
-			if ((pos < (byte)23)){
-				value += (pawnValue/10); //temp value -must confirm with David Watt  - must be extended to watch for blocking/attacking pieces
-			}
-			/*
-			 * Pawn Protection
-			 */
-			if (b.inRange((byte)(pos + 17))){ // I.e. not out of bounds
-				if(!(boardArray[(byte) pos + 17] == null)){
-					if(boardArray[(byte) pos + 17].getPiece().getType() == Type.PAWN){
-						value += (pawnValue/10);
-					}
-				}
-			}
-			if(b.inRange((byte) (pos + 15))){
-				if(!(boardArray[(byte) pos + 15] == null)){
-					if(boardArray[(byte) pos + 15].getPiece().getType() == Type.PAWN){
-						value += (pawnValue/10);
-					}
-				}
-			}
-			/*
-			 * Central control
-			 */
-			value += centerControl(pos, node.getPiece(), b);
+		else {
 			
-			/*
-			 * Wider centre control
-			 */
-			value += widerControl(node.getPiece().getPosition(), b);
-			
-			/*
-			 * Gains points for restricting opposing King movement
-			 */
-			value += getKingAttack(b, node.getPiece(),Colour.BLACK);
-			break;
-
-			case ROOK: value += rookValue;
-			/*
-			 * Central control
-			 */
-			value += centerControl(pos, node.getPiece(), b);
-			
-			/*
-			 * Wider centre control
-			 */
-			value += widerControl(node.getPiece().getPosition(), b);
-			
-			// +50% of pawnScore for saving Rook till after two other minor pieces have moved
-			if ((!node.getPiece().hasMoved()) && b.getMinorDeveloped() <= 2){
-				value += (pawnValue/2);
-			}
-			/*
-			 * Gains points for restricting opposing King movement
-			 */
-			value += getKingAttack(b, node.getPiece(),Colour.BLACK);
-			break;
-			case BISHOP: value += bishopValue;
-			/*
-			 * Central control
-			 */
-			value += centerControl(pos, node.getPiece(), b);
-			
-			/*
-			 * Wider centre control
-			 */
-			value += widerControl(node.getPiece().getPosition(), b);
-			
-			/*
-			 * Gains points for restricting opposing King movement
-			 */
-			value += getKingAttack(b, node.getPiece(),Colour.BLACK);
-			break;
-
-			case KNIGHT: value += knightValue;
-			/*
-			 * Central control
-			 */
-			value += centerControl(pos, node.getPiece(), b);
-			/*
-			 * Wider centre control
-			 */
-			value += widerControl(node.getPiece().getPosition(), b);
-			
-			// 20% of pawnScore for developing knight before bishop
-			if (!node.getPiece().hasMoved()){
-				value += getKnightOrderScore(b.getBlacksList());
-			}
-			/*
-			 * Gains points for restricting opposing King movement
-			 */
-			value += getKingAttack(b, node.getPiece(),Colour.BLACK);
-			break;
-			/*
-			 * Is the piece covering the central squares?
-			 */
-			case QUEEN: value += queenValue;
-			/*
-			 * Central control
-			 */
-			value += centerControl(pos, node.getPiece(), b);
-			/*
-			 * Wider centre control
-			 */
-			value += widerControl(node.getPiece().getPosition(), b);
-			// +33% of pawnScore for saving Queen till after two other minor pieces have moved
-			if ((!node.getPiece().hasMoved()) && b.getMinorDeveloped() < 3){
-				value += (pawnValue/3);	
-			}
-			/*
-			 * Gains points for restricting opposing King movement
-			 */
-			value += getKingAttack(b, node.getPiece(),Colour.BLACK);
-			break;
-			default:
-			}
+			// consider king mobility
+			value += evaluateKingMobility(b, ourColour);
+			value -= evaluateKingMobility(b, theirColour);
 		}
-		return value;
-	}
 
-
-
-	/**
-	 * 
-	 * @param pieceList
-	 * @return a value based on the ordering of the development of the knight.
-	 * Knights should be developed before Bishops 
-	 */
-	private int getKnightOrderScore(PieceList pieceList) {
-		for(PieceListNode node : pieceList){
-			if(node.getPiece().hasMoved() && node.getPiece().getType() == Type.BISHOP)
-				return (-(pawnValue/10 * 2));
-		}
-		return 0;
-	}
-	/**
-	 * 
-	 * @param pos
-	 * @param piece
-	 * @param b
-	 * @return value based on the central control of the piece, whether it is in the center, or can attack the centre
-	 * Weightings gave by David
-	 */
-	private int centerControl(byte pos,Piece piece,Board b){
-		int value = 0; 
-		if ((pos == (byte)51 || pos ==(byte)52 || pos == (byte)67 || pos == (byte)68)){
-			if (piece.getType() == Type.PAWN || piece.getType() == Type.KING){
-				value += (pawnValue/10)*4;
-			}
-			else if (piece.getType() == Type.QUEEN ){
-				value += (pawnValue/10)*3;
-			}
-			else{
-				value += (pawnValue/10)*2;
-			}
-		}
-		else if ((canAttack(piece, (byte) 51, b)) ||(canAttack(piece, (byte) 52, b)) || (canAttack(piece, (byte) 67, b)) || (canAttack(piece, (byte) 51, b))){
-			value += (pawnValue/10);
-		}
 		return value;
 	}
 	
-	public int widerControl(byte pos, Board board){
-		if (((pos > (byte)33 && pos < (byte) 38) || pos ==(byte)50 || pos == (byte)53 || pos == (byte)66 || pos == (byte)69 || (pos > 81 && pos < 86))){
-			return (pawnValue/10);
+	// calculates the net gain/loss resulting from pawn structure from the perspective of the player whose turn it is.
+	// considers doubled pawns, side pawns, passed pawns and isolated pawns
+	private int evaluatePawnStructure(Board b) {
+		
+		// each array has an entry for each column on the board. The entry contains
+		// the row number of the corresponding pawn (0 - 7) or -1 if there is no 
+		// corresponding pawn. For each colour we need to note the farthest forward and
+		// Farthest back on each column for passed pawn determination.
+		int[] whitePawnsFarthestForwardOnEachCol = new int[] {-1,-1,-1,-1,-1,-1,-1,-1};
+		int[] whitePawnsFarthestBackOnEachCol = new int[] {-1,-1,-1,-1,-1,-1,-1,-1};
+		int[] blackPawnsFarthestForwardOnEachCol = new int[] {-1,-1,-1,-1,-1,-1,-1,-1};
+		int[] blackPawnsFarthestBackOnEachCol = new int[] {-1,-1,-1,-1,-1,-1,-1,-1};
+		
+		int whitesNumDoubled = 0;
+		int whitesNumSide = 0;
+		int blacksNumDoubled = 0;
+		int blacksNumSide = 0;
+		
+		PieceList whitesPieceList = b.getWhitesList();
+		PieceList blacksPieceList = b.getBlacksList();
+		
+		for(PieceListNode node : whitesPieceList) {
+			
+			if(node.getPiece().getType() == Piece.Type.PAWN) {
+				
+				int column = node.getPiece().getPosition() & 7;
+				int row = node.getPiece().getPosition() >> 4;
+				
+				if(column == 0 || column == 7) whitesNumSide++;
+				
+				// if none on this column yet, then this is both the farthest forward and back
+				if(whitePawnsFarthestForwardOnEachCol[column] == -1 && 
+						whitePawnsFarthestBackOnEachCol[column] == -1) {
+					
+					whitePawnsFarthestForwardOnEachCol[column] = row;
+					whitePawnsFarthestBackOnEachCol[column] = row;
+				}
+				else {
+					
+					// may need to update farthest forward or back
+					whitePawnsFarthestForwardOnEachCol[column] = 
+							Math.max(whitePawnsFarthestForwardOnEachCol[column], row);
+					whitePawnsFarthestBackOnEachCol[column] = 
+							Math.min(whitePawnsFarthestBackOnEachCol[column], row);
+					
+					// certainly need to note down another doubled pawn
+					whitesNumDoubled++;
+				}
+			}
 		}
-		return 0;
+		
+		for(PieceListNode node : blacksPieceList) {
+			
+			if(node.getPiece().getType() == Piece.Type.PAWN) {
+				
+				int column = node.getPiece().getPosition() & 7;
+				int row = node.getPiece().getPosition() >> 4;
+				
+				if(column == 0 || column == 7) blacksNumSide++;
+				
+				// if none on this column yet, then this is both the farthest forward and back
+				if(blackPawnsFarthestForwardOnEachCol[column] == -1 && 
+						blackPawnsFarthestBackOnEachCol[column] == -1) {
+					
+					blackPawnsFarthestForwardOnEachCol[column] = row;
+					blackPawnsFarthestBackOnEachCol[column] = row;
+				}
+				else {
+					
+					// may need to update farthest forward or back
+					blackPawnsFarthestForwardOnEachCol[column] = 
+							Math.min(blackPawnsFarthestForwardOnEachCol[column], row);
+					blackPawnsFarthestBackOnEachCol[column] = 
+							Math.max(blackPawnsFarthestBackOnEachCol[column], row);
+					
+					// certainly need to note down another doubled pawn
+					blacksNumDoubled++;
+				}
+			}
+		}
+		
+		int whitesNumIsolated = 0;
+		int blacksNumIsolated = 0;
+		
+		// to keep the complexity down, you only get penalised once for each column with an isolated pawn
+		for(int col = 0; col < 8; col++) {
+
+			// first check that we have a pawn on this column
+			if(whitePawnsFarthestForwardOnEachCol[col] != -1) {
+				
+				if(col != 0) {
+
+					if(whitePawnsFarthestForwardOnEachCol[col - 1] != -1) {
+
+						// then there is a pawn on col - 1
+						break;
+					}
+				}
+				if(col != 7) {
+
+					if(whitePawnsFarthestForwardOnEachCol[col + 1] != -1) {
+
+						break;
+					}
+				}
+				// if we got here then we have no neighbours
+				whitesNumIsolated++;
+			}
+		}
+		for(int col = 0; col < 8; col++) {
+
+			// first check that we have a pawn on this column
+			if(whitePawnsFarthestForwardOnEachCol[col] != -1) {
+				
+				if(col != 0) {
+
+					if(blackPawnsFarthestForwardOnEachCol[col - 1] != -1) {
+
+						// then there is a pawn on col - 1
+						break;
+					}
+				}
+				if(col != 7) {
+
+					if(blackPawnsFarthestForwardOnEachCol[col + 1] != -1) {
+
+						break;
+					}
+				}
+				// if we got here then we have no neighbours
+				blacksNumIsolated++;
+			}
+		}
+		
+		int whitesNumPassed = 0;
+		int blacksNumPassed = 0;
+		
+		// similarly, only benefit once for each column with a passed pawn
+		for(int col = 0; col < 8; col++) {
+			
+			int ourRow = whitePawnsFarthestForwardOnEachCol[col];
+			
+			if(ourRow != -1) {
+
+				if(blackPawnsFarthestBackOnEachCol[col] != -1 &&
+						blackPawnsFarthestBackOnEachCol[col] > ourRow) {
+					
+					// black pawn blocking, not passed
+					break;
+				}
+				if((col != 0) && (blackPawnsFarthestBackOnEachCol[col - 1] != -1) &&
+				(blackPawnsFarthestBackOnEachCol[col - 1] > ourRow)) {
+					
+					break;
+				}
+				if((col != 7) && (blackPawnsFarthestBackOnEachCol[col + 1] != -1) &&
+				(blackPawnsFarthestBackOnEachCol[col + 1] > ourRow)) {
+					
+					break;
+				}
+				// if we got here then there are no pawns blocking our way
+				whitesNumPassed++;
+			}
+		}
+		for(int col = 0; col < 8; col++) {
+			
+			int ourRow = blackPawnsFarthestForwardOnEachCol[col];
+			
+			if(ourRow != -1) {
+
+				if(whitePawnsFarthestBackOnEachCol[col] != -1 &&
+						whitePawnsFarthestBackOnEachCol[col] < ourRow) {
+					
+					// white pawn blocking, not passed
+					break;
+				}
+				if((col != 0) && (whitePawnsFarthestBackOnEachCol[col - 1] != -1) &&
+				(whitePawnsFarthestBackOnEachCol[col - 1] < ourRow)) {
+					
+					break;
+				}
+				if((col != 7) && (whitePawnsFarthestBackOnEachCol[col + 1] != -1) &&
+				(whitePawnsFarthestBackOnEachCol[col + 1] < ourRow)) {
+					
+					break;
+				}
+				// if we got here then there are no pawns blocking our way
+				blacksNumPassed++;
+			}
+		}
+		
+		int score = 0;
+		// finally we have all of the required information so we can assign a score
+		if(b.getThisPlayer() == Colour.WHITE) {
+			
+			score -= whitesNumSide * currentValues.sidePawnPenalty;
+			score -= whitesNumDoubled * currentValues.doubledPawnPenalty;
+			score -= whitesNumIsolated * currentValues.isolatedPawnPenalty;
+			score += whitesNumPassed * currentValues.passedPawnBonus;
+
+			score += blacksNumSide * currentValues.sidePawnPenalty;
+			score += blacksNumDoubled * currentValues.doubledPawnPenalty;
+			score += blacksNumIsolated * currentValues.isolatedPawnPenalty;
+			score -= blacksNumPassed * currentValues.passedPawnBonus;
+		}
+		else {
+			
+			score -= blacksNumSide * currentValues.sidePawnPenalty;
+			score -= blacksNumDoubled * currentValues.doubledPawnPenalty;
+			score -= blacksNumIsolated * currentValues.isolatedPawnPenalty;
+			score += blacksNumPassed * currentValues.passedPawnBonus;
+
+			score += whitesNumSide * currentValues.sidePawnPenalty;
+			score += whitesNumDoubled * currentValues.doubledPawnPenalty;
+			score += whitesNumIsolated * currentValues.isolatedPawnPenalty;
+			score -= whitesNumPassed * currentValues.passedPawnBonus;
+		}
+		
+		return score;
+	}
+	
+	private int getMaterial(Board b, Colour c) {
+		
+		PieceList pieces;
+		if(c == Colour.WHITE) pieces = b.getWhitesList();
+		else pieces = b.getBlacksList();
+		
+		int value = 0;
+		for(PieceListNode node : pieces) {
+			switch(node.getPiece().getType()) {
+
+			case PAWN: value += currentValues.pawn;
+			break;
+
+			case ROOK: value += currentValues.rook;
+			break;
+
+			case BISHOP: value += currentValues.bishop;
+			break;
+
+			case KNIGHT: value += currentValues.knight;
+			break;
+
+			case QUEEN: value += currentValues.queen;
+			break;
+			default:
+			}
+		}
+		
+		return value;
+	}
+	
+	// calculates the net gain/loss resulting from central control from the perspective of the player whose turn it is
+	private int evaluateCentralControl(Board b) {
+		
+		Colour ourColour = b.getThisPlayer();
+		
+		int value = 0;
+		
+		byte[] innerCentralSquares = new byte[] {51, 52, 67, 68};
+		byte[] outerCentralSquares = new byte[] {35, 36, 37, 38, 50, 53, 66, 69, 82, 83, 84, 85};
+		
+		for(byte square : innerCentralSquares) {
+			
+			LinkedList<Piece> attackingPieces = b.getPiecesAttackingSquare(square);
+			for(Piece piece : attackingPieces) {
+				
+				if(piece.getColour() == ourColour) value += currentValues.valueForAttackingInnerCenralSquare;
+				else value -= currentValues.valueForAttackingInnerCenralSquare;
+			}
+			
+			// also consider pieces occupying central squares
+			Piece p = b.getPieceAt(square);
+			if(p != null) {
+				
+				if(p.getColour() == ourColour) value += currentValues.valueForOccupyingInnerCentralSquare;
+				else value -= currentValues.valueForOccupyingInnerCentralSquare;
+			}
+		}
+		
+		for(byte square : outerCentralSquares) {
+			
+			LinkedList<Piece> attackingPieces = b.getPiecesAttackingSquare(square);
+			for(Piece piece : attackingPieces) {
+				
+				if(piece.getColour() == ourColour) value += currentValues.valueForAttackingOuterCenralSquare;
+				else value -= currentValues.valueForAttackingOuterCenralSquare;
+			}
+			
+			// also consider pieces occupying central squares
+			Piece p = b.getPieceAt(square);
+			if(p != null) {
+
+				if(p.getColour() == ourColour) value += currentValues.valueForOccupyingOuterCentralSquare;
+				else value -= currentValues.valueForOccupyingOuterCentralSquare;
+			}
+		}
+		return value;
 	}
 
-	/**
-	 * 
-	 * @param board
-	 * @return a value based on whether the King has lost its ability to caste without moving
-	 */
-	private int hasCastled(Board board) {
-		if(board.getThisPlayer() == Colour.BLACK){
-			if (board.getHasCastled() && board.getBlackKingPos() == (byte)116){
-				return -(2*pawnValue);
-			}
-			else{
-				return 0;
+	// For use during early/mid game only
+	int evaluateKingSafety(Board b, Colour c) {
+		
+		int backRow;
+		int forwards;
+		byte kingPos;
+		if(c == Colour.WHITE) {
+			
+			backRow = 0;
+			forwards = 16;
+			kingPos = b.getWhiteKingPos();
+		}
+		else {
+			
+			backRow = 7;
+			forwards = -16;
+			kingPos = b.getBlackKingPos();
+		}
+		
+		int value = 0;
+		
+		int kingCol = kingPos & 7;
+		int kingRow = kingPos >> 4;
+		if(kingRow == backRow) value += currentValues.kingOnBackRowDuringMiddleGame;
+		
+		byte towardsSide;
+		if(kingCol <= 3) towardsSide = -1;
+		else towardsSide = 1;
+		
+		// check that squares between king and side are empty
+		boolean empty = true;
+		for(byte nextSquare = (byte)(towardsSide + kingPos); (nextSquare & 0x88) == 0; nextSquare += towardsSide) {
+			
+			if(b.getPieceAt(nextSquare) != null) {
+				
+				empty = false;
+				break;
 			}
 		}
-		else{
-			if (board.getHasCastled() && board.getWhiteKingPos() == (byte)4){
-				return -(2*pawnValue);
-			}
-			else{
-				return 0;
+		if(empty) {
+			
+			value += currentValues.kingClearSideDuringMiddleGame;
+		}
+		
+		if(kingCol <= 1 || kingCol >= 6) value += currentValues.kingClearSideDuringMiddleGame;
+		
+		// now check for pawns in front of king
+		Piece forwardOne = b.getPieceAt((byte)(kingPos + forwards));
+		if(forwardOne != null && forwardOne.getColour() == c && forwardOne.getType() == Piece.Type.PAWN) {
+			
+			value += currentValues.kingPawnGuardBonus;
+		}
+		if(kingCol != 0) {
+			
+			Piece forwardLeft = b.getPieceAt((byte)(kingPos + forwards - 1));
+			if(forwardLeft != null && forwardLeft.getColour() == c && forwardLeft.getType() == Piece.Type.PAWN) {
+
+				value += currentValues.kingPawnGuardBonus;
 			}
 		}
-	}
+		if(kingCol != 7) {
+			
+			Piece forwardRight = b.getPieceAt((byte)(kingPos + forwards + 1));
+			if(forwardRight != null && forwardRight.getColour() == c && forwardRight.getType() == Piece.Type.PAWN) {
 
-	/**
-	 * 
-	 * @param p the chosen piece
-	 * @param pos the position to be checked
-	 * @param board
-	 * @return true if the piece can attack that square on the board. False if otherwise
-	 */
-	private boolean canAttack(Piece p, byte pos, Board board){
-
-		PieceListNode[] boardArray = board.getBoardArray();
-
-		//test for white pawn
-		if (p.getColour() == Colour.WHITE && p.getType() == Type.PAWN){
-			if(pos == ((byte) p.getPosition()+17)||pos == ((byte) p.getPosition()+15)){
-				return true;
-			}
-			return false;
-		}
-
-		//test for black pawn
-		if (p.getColour() == Colour.BLACK && p.getType() == Type.PAWN){
-			if(pos == ((byte) p.getPosition()-17)||pos == ((byte) p.getPosition()-15)){
-				return true;
-			}
-			else{
-				return false;
+				value += currentValues.kingPawnGuardBonus;
 			}
 		}
-
-		//test for sliding piece
-		byte[] normalMoves = ((NonPawn)p).getDirections();
-		if(p instanceof SlidingPiece) {
-
-			for(byte move : normalMoves) {
-
-				byte nextPosition = (byte)(p.getPosition() + move);
-				boolean finished = false;
-				while(!finished) {
-
-					// test whether off the board
-					if((nextPosition & 0x88) != 0) {
-
-						finished = true;
+		
+		// now check for pieces attacking squares around king
+		byte[] squaresAroundKing = new byte[] {	(byte) (kingPos + 15), (byte) (kingPos + 16), (byte) (kingPos + 17),
+												(byte) (kingPos -  1), 		/* kingPos */ 	  (byte) (kingPos + 1),
+												(byte) (kingPos - 17), (byte) (kingPos - 16), (byte) (kingPos - 15)};
+		
+		for(byte square : squaresAroundKing) {
+			
+			if((square & 0x88) == 0) {
+				
+				LinkedList<Piece> piecesAttackingSquare = b.getPiecesAttackingSquare(square);
+				for(Piece p : piecesAttackingSquare) {
+					
+					if(p.getColour() == c) {
+						
+						value += currentValues.bonusForDefendingSquareByKing;
 					}
 					else {
-
-						// test whether next square is occupied
-						if(boardArray[nextPosition] != null) {
-
-							// test whether next square is occupied by one of the enemy's pieces
-							if(boardArray[nextPosition].getPiece().getColour() == board.getOtherPlayer()) {
-
-								Move m = new Move(p.getPosition(), nextPosition, boardArray[nextPosition].getPiece());
-								if(board.legal(m)) return true;
-							}
-
-							finished = true;
-						}
-						else {
-
-							Move m = new Move(p.getPosition(), nextPosition);
-							if(board.legal(m)) return true;
-						}
-
-						nextPosition = (byte)(nextPosition + move);
+						
+						value += currentValues.penaltyForOpponentAttackingSquareByKing;
 					}
 				}
 			}
 		}
-		if(p instanceof SteppingPiece) {
-
-			for(byte move : normalMoves) {
-
-				byte newPosition = (byte)(p.getPosition() + move);
-				if((newPosition & 0x88) == 0) {
-
-					if(boardArray[newPosition] == null) {
-
-						Move m = new Move(p.getPosition(), newPosition);
-						if(board.legal(m)) return true;
-					}
-					// test whether new square is occupied by one of the enemy's pieces pieces
-					else if(boardArray[newPosition].getPiece().getColour() == board.getOtherPlayer()) {
-
-						Move m = new Move(p.getPosition(), newPosition, boardArray[newPosition].getPiece());
-						if(board.legal(m)) return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * 
-	 * @param board
-	 * @return a value based on how well protected the king is. You should also be heavily docked points of leaving the King only one place to move(will be done in King mobility)
-	 */
-	private int getKingProtectionValue(Board board) {
-		int value = 0;
-		byte kingPos;
-		Colour mine;
-		PieceListNode[] boardArray = board.getBoardArray();
-		mine = board.getThisPlayer();
-		if (mine == Colour.WHITE){
-			kingPos = board.getWhiteKingPos();
-		}
-		else{
-			kingPos = board.getBlackKingPos();
-		}
-		if(board.inRange((byte) (kingPos + 15))){
-			if(!(boardArray[(byte) kingPos + 15] == null)){
-				if(boardArray[(byte) kingPos + 15].getPiece().getColour() == mine){
-					value += (pawnValue/10);
-				}
-			}
-			value += (pawnValue/10); //against side of board. Still good
-		}
-		if(board.inRange((byte) (kingPos - 15))){
-			if(!(boardArray[(byte) kingPos - 15] == null)){
-				if(boardArray[(byte) kingPos - 15].getPiece().getColour() == mine){
-					value += (pawnValue/10);
-				}
-			}
-			value += (pawnValue/10); //against side of board. Still good
-		}
-		if(board.inRange((byte) (kingPos + 16))){
-			if(!(boardArray[(byte) kingPos + 16] == null)){
-				if(boardArray[(byte) kingPos + 16].getPiece().getColour() == mine){
-					value += (pawnValue/10);
-				}
-			}
-			value += (pawnValue/10); //against side of board. Still good
-		}
-		if(board.inRange((byte) (kingPos - 16))){
-			if(!(boardArray[(byte) kingPos - 16] == null)){
-				if(boardArray[(byte) kingPos - 16].getPiece().getColour() == mine){
-					value += (pawnValue/10);
-				}
-			}
-			value += (pawnValue/10); //against side of board. Still good
-		}
-		if(board.inRange((byte) (kingPos + 17))){
-			if(!(boardArray[(byte) kingPos + 17] == null)){
-				if(boardArray[(byte) kingPos + 17].getPiece().getColour() == mine){
-					value += (pawnValue/10);
-				}
-			}
-			value += (pawnValue/10); //against side of board. Still good
-		}
-		if(board.inRange((byte) (kingPos - 17))){
-			if(!(boardArray[(byte) kingPos - 17] == null)){
-				if(boardArray[(byte) kingPos - 17].getPiece().getColour() == mine){
-					value += (pawnValue/10);
-				}
-			}
-			value += (pawnValue/10); //against side of board. Still good
-		}
-		if(board.inRange((byte) (kingPos + 1))){
-			if(!(boardArray[(byte) kingPos + 1] == null)){
-				if(boardArray[(byte) kingPos + 1].getPiece().getColour() == mine){
-					value += (pawnValue/10);
-				}
-			}
-			value += (pawnValue/10); //against side of board. Still good
-		}
-		if(board.inRange((byte) (kingPos - 1))){
-			if(!(boardArray[(byte) kingPos - 1] == null)){
-				if(boardArray[(byte) kingPos - 1].getPiece().getColour() == mine){
-					value += (pawnValue/10);
-				}
-			}
-			value += (pawnValue/10); //against side of board. Still good
-		}
+		
 		return value;
 	}
-
-	/**
-	 * 
-	 * @param board
-	 * @return value based off of how many pieces are next to
-	 * Virtually the same code as getKingProtection. Could this be changed?
-	 */ 
-	private int getKingAttack(Board board){
-		int value = 0;
+	
+	// for use during end game only
+	int evaluateKingMobility(Board b, Colour c) {
+		
 		byte kingPos;
-		Colour mine;
-		PieceListNode[] boardArray = board.getBoardArray();
-		mine = board.getThisPlayer();
-		if (mine == Colour.WHITE){
-			kingPos = board.getBlackKingPos();
+		if(c == Colour.WHITE) {
+			
+			kingPos = b.getWhiteKingPos();
 		}
-		else{
-			kingPos = board.getWhiteKingPos();
+		else {
+			
+			kingPos = b.getBlackKingPos();
 		}
-		if(board.inRange((byte) (kingPos + 15))){
-			if(!(boardArray[(byte) kingPos + 15] == null)){
-				if(boardArray[(byte) kingPos + 15].getPiece().getColour() == mine){
-					value += (pawnValue/10);
-				}
-			}
-		}
-		if(board.inRange((byte) (kingPos - 15))){
-			if(!(boardArray[(byte) kingPos - 15] == null)){
-				if(boardArray[(byte) kingPos - 15].getPiece().getColour() == mine){
-					value += (pawnValue/10);
-				}
-			}
-		}
-		if(board.inRange((byte) (kingPos + 16))){
-			if(!(boardArray[(byte) kingPos + 16] == null)){
-				if(boardArray[(byte) kingPos + 16].getPiece().getColour() == mine){
-					value += (pawnValue/10);
-				}
-			}
-		}
-		if(board.inRange((byte) (kingPos - 16))){
-			if(!(boardArray[(byte) kingPos - 16] == null)){
-				if(boardArray[(byte) kingPos - 16].getPiece().getColour() == mine){
-					value += (pawnValue/10);
-				}
-			}
-		}
-		if(board.inRange((byte) (kingPos + 17))){
-			if(!(boardArray[(byte) kingPos + 17] == null)){
-				if(boardArray[(byte) kingPos + 17].getPiece().getColour() == mine){
-					value += (pawnValue/10);
-				}
-			}
-		}
-		if(board.inRange((byte) (kingPos - 17))){
-			if(!(boardArray[(byte) kingPos - 17] == null)){
-				if(boardArray[(byte) kingPos - 17].getPiece().getColour() == mine){
-					value += (pawnValue/10);
-				}
-			}
-		}
-		if(board.inRange((byte) (kingPos + 1))){
-			if(!(boardArray[(byte) kingPos + 1] == null)){
-				if(boardArray[(byte) kingPos + 1].getPiece().getColour() == mine){
-					value += (pawnValue/10);
-				}
-			}
-		}
-		if(board.inRange((byte) (kingPos - 1))){
-			if(!(boardArray[(byte) kingPos - 1] == null)){
-				if(boardArray[(byte) kingPos - 1].getPiece().getColour() == mine){
-					value += (pawnValue/10);
-				}
-			}
-		}
-		return value;
-	}
-	/**
-	 * 
-	 * @param board
-	 * @param piece
-	 * @param colour
-	 * @return a value based on the ability to attack the squares round the enemy king and hence limit its movement
-	 * Does not need to worry about other pieces in these squares as the kings movement will still be restricted 
-	 */
-	private int getKingAttack(Board board, Piece piece, Colour colour){
+		
+		int kingRow = kingPos >> 4;
+		int kingCol = kingPos & 7;
+		
 		int value = 0;
-		byte kingPos;
-		Colour mine;
-		mine = board.getThisPlayer();
-		if (mine == Colour.WHITE){
-			kingPos = board.getBlackKingPos();
+		
+		// assign bonus if in inner centre
+		if((kingRow == 3 || kingRow == 4) && (kingCol == 3 || kingCol == 4)) {
+			
+			value += currentValues.kingInInnerCentreDuringEndGame;
 		}
-		else{
-			kingPos = board.getWhiteKingPos();
+		else if(kingRow >= 2 && kingRow <= 5 && kingCol >= 2 && kingRow <= 5) {
+			
+			value += currentValues.kingInOuterCentreDuringEndGame;
 		}
-		if(board.inRange((byte) (kingPos + 15))){
-			if(canAttack(piece,((byte)(kingPos + 15)),board)){
-				value += (pawnValue/10);
-			}
-		}
-		if(board.inRange((byte) (kingPos - 15))){
-			if(canAttack(piece,((byte)(kingPos - 15)),board)){
-				value += (pawnValue/10);
-			}
-		}
-		if(board.inRange((byte) (kingPos + 16))){
-			if(canAttack(piece,((byte)(kingPos + 16)),board)){
-				value += (pawnValue/10);
-			}
-		}
-		if(board.inRange((byte) (kingPos - 16))){
-			if(canAttack(piece,((byte)(kingPos - 16)),board)){
-				value += (pawnValue/10);
-			}
-		}
-		if(board.inRange((byte) (kingPos + 17))){
-			if(canAttack(piece,((byte)(kingPos + 17)),board)){
-				value += (pawnValue/10);
-			}
-		}
-		if(board.inRange((byte) (kingPos - 17))){
-			if(canAttack(piece,((byte)(kingPos - 17)),board)){
-				value += (pawnValue/10);
-			}
-		}
-		if(board.inRange((byte) (kingPos + 1))){
-			if(canAttack(piece,((byte)(kingPos + 1)),board)){
-				value += (pawnValue/10);
-			}
-		}
-		if(board.inRange((byte) (kingPos - 1))){
-			if(canAttack(piece,((byte)(kingPos - 1)),board)){
-				value += (pawnValue/10);
-			}
-		}
-		return value;
-	}
-
-	/**
-	 * 
-	 * @param board
-	 * @return score based on the kings position during end game.
-	 * Value for this taken from http://www.chessbin.com/post/Chess-Board-Evaluation.aspx
-	 */
-	private int getKingPos(Board board){
-		if (board.getThisPlayer() == Colour.WHITE){
-			centerControl(board.getWhiteKingPos(),board.getBoardArray()[board.getWhiteKingPos()].getPiece(), board);
-		}else{
-			centerControl(board.getBlackKingPos(),board.getBoardArray()[board.getBlackKingPos()].getPiece(), board);
-		}
-		return 0;
-	}
-
-	/**
-	 * 
-	 * @param board
-	 * @return score based on the kings mobility
-	 * Need to check values with David Watt
-	 */
-	private int getKingMobility(Board board) {
-		int[] moves = {-17,-16,-15, -1, 1, 15, 16, 17};
-		int value = 0;
-		int total = 0;
-		for (int current : moves){
-			if (board.getThisPlayer() == Colour.WHITE){
-				if (canAttack(board.getBoardArray()[board.getWhiteKingPos()].getPiece(), ((byte)(board.getWhiteKingPos() + current)), board)){
-					value += pawnValue/2;
-					total++;
-				}
-			}
-			else{
-				if (canAttack(board.getBoardArray()[board.getBlackKingPos()].getPiece(), ((byte)(board.getBlackKingPos() + current)), board)){
-					value += pawnValue/2;
-					total++;
-				}
-			}
-			if (total < 2){
-				value -= pawnValue/2;
-			}
-
-		}
+		
 		return value;
 	}
 }

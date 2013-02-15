@@ -23,7 +23,6 @@ public class Board {
 	private Stack<Move> previousMoves;
 	private byte whiteKingPos; // so we don't have to search to find kings every time we check for 'check'
 	private byte blackKingPos;
-	private boolean hasCastled = false; /* used in evaluation */
 	private int minorDeveloped = 0; /*useful for keeping queen from moving early */
 	/**
 	 * Constructor
@@ -74,10 +73,6 @@ public class Board {
 	
 	public PieceListNode[] getBoardArray(){
 		return boardArray;
-	}
-
-	public boolean getHasCastled(){
-		return hasCastled;
 	}
     
 	public int getMinorDeveloped(){
@@ -188,7 +183,6 @@ public class Board {
 				boardArray[m.getStartpos() - 1] = boardArray[m.getStartpos() - 4];
 				boardArray[m.getStartpos() - 4] = null;
 				boardArray[m.getStartpos() - 1].getPiece().setPosition((byte)(m.getStartpos() - 1));
-				hasCastled = true;
 			}
 			// if castling to the right, we must move the right rook
 			if(m.getStartpos() - m.getEndpos() == -2) {
@@ -196,7 +190,6 @@ public class Board {
 				boardArray[m.getStartpos() + 1] = boardArray[m.getStartpos() + 3];
 				boardArray[m.getStartpos() + 3] = null;
 				boardArray[m.getStartpos() + 1].getPiece().setPosition((byte)(m.getStartpos() + 1));
-				hasCastled = true;
 			}
 		}
 
@@ -211,8 +204,6 @@ public class Board {
 	 */
 	public void undoMove() {
 		
-		
-
 		Colour temp = thisPlayer;
 		thisPlayer = getOtherPlayer();
 		setOtherPlayer(temp);
@@ -258,7 +249,6 @@ public class Board {
 				boardArray[m.getStartpos() - 1] = null;
 				boardArray[m.getStartpos() - 4].getPiece().setPosition((byte)(m.getStartpos() - 4));
 				boardArray[m.getStartpos() - 4].getPiece().setHasMoved(false);
-				hasCastled = false;
 			}
 
 			// if right castle we must move the left rook
@@ -269,7 +259,6 @@ public class Board {
 				boardArray[m.getStartpos() + 1] = null;
 				boardArray[m.getStartpos() + 3].getPiece().setPosition((byte)(m.getStartpos() + 3));
 				boardArray[m.getStartpos() + 3].getPiece().setHasMoved(false);
-				hasCastled = false;
 			}
 		}
 	}
@@ -639,11 +628,169 @@ public class Board {
 		this.otherPlayer = otherPlayer;
 	}
 
+	public boolean isLeftCastlePossible(Colour c) {
+		
+		byte kingPos;
+		if(c == Colour.WHITE) {
+			
+			kingPos = whiteKingPos;
+		}
+		else {
+			
+			kingPos = blackKingPos;
+		}
+		
+		Piece king = boardArray[kingPos].getPiece();
+		if(!king.hasMoved()) {
+			
+			// check whether left rook is unmoved
+			if((boardArray[kingPos - 4] != null) && 
+					(boardArray[kingPos - 4].getPiece().getType() == Piece.Type.ROOK) &&
+					(!boardArray[kingPos - 4].getPiece().hasMoved())) {
+				
+				return true;
+			}
+		}
+		return false;
+	}
 	
+	public boolean isRightCastlePossible(Colour c) {
+		
+		byte kingPos;
+		if(c == Colour.WHITE) {
+			
+			kingPos = whiteKingPos;
+		}
+		else {
+			
+			kingPos = blackKingPos;
+		}
+		
+		Piece king = boardArray[kingPos].getPiece();
+		if(!king.hasMoved()) {
+			
+			// check whether right rook is unmoved
+			if((boardArray[kingPos + 3] != null) && 
+					(boardArray[kingPos + 3].getPiece().getType() == Piece.Type.ROOK) &&
+					(!boardArray[kingPos + 3].getPiece().hasMoved())) {
+				
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public LinkedList<Piece> getPiecesAttackingSquare(byte square) {
+		
+		LinkedList<Piece> attackingPieces = new LinkedList<Piece>();
+		
+		// check for attacking stepping pieces
+		for(byte dir : NonPawn.getKnightDir()) {
+
+			if(((byte)(square + dir) & 0x88) == 0) {
+
+				if(boardArray[square + dir] != null && boardArray[square + dir].getPiece().getType() == Piece.Type.KNIGHT) {
+					
+					attackingPieces.add(boardArray[square + dir].getPiece());
+				}
+			}
+		}
+		for(byte dir : NonPawn.getKingDir()) {
+
+			if(((byte)(square + dir) & 0x88) == 0) {
+
+				if(boardArray[square + dir] != null && boardArray[square + dir].getPiece().getType() == Piece.Type.KING) {
+					
+					attackingPieces.add(boardArray[square + dir].getPiece());
+				}
+			}
+		}
+		
+		// check for attacking sliding pieces
+		byte[][] dirSets = new byte[2][];
+		dirSets[0] = NonPawn.getRookDir();
+		dirSets[1] = NonPawn.getBishDir();
+
+		for(int i = 0; i < 2; i++) {
+
+			for(byte dir : dirSets[i]) {
+
+				byte nextPosition = (byte)(square + dir);
+				boolean finished = false;
+				while(!finished) {
+
+					// test whether off the board
+					if((nextPosition & 0x88) != 0) {
+
+						finished = true;
+					}
+					else {
+
+						// test whether next square is occupied
+						if(boardArray[nextPosition] != null) {
+
+							// this code is disgusting, sorry
+							Piece.Type dangerType;
+							if(i == 0) dangerType = Piece.Type.ROOK;
+							else dangerType = Piece.Type.BISHOP;
+
+							if((boardArray[nextPosition].getPiece().getType() == dangerType ||
+									boardArray[nextPosition].getPiece().getType() == Piece.Type.QUEEN)) {
+								
+								attackingPieces.add(boardArray[nextPosition].getPiece());
+							}
+
+							finished = true;
+						}
+						else {
+
+							nextPosition = (byte)(nextPosition + dir);
+						}
+					}
+				}
+			}
+		}
+		
+		// check for attacking white pawns
+		byte[] dirs = Pawn.getCaptureDirs(Colour.WHITE);
+		for(byte dir : dirs) {
+
+			byte newPosition = (byte)(square - dir); // '-' because dir is from pawns perspective
+			if(((byte)(newPosition) & 0x88) == 0) {
+
+				if(boardArray[newPosition] != null && boardArray[newPosition].getPiece().getType() == Piece.Type.PAWN) {
+					
+					attackingPieces.add(boardArray[newPosition].getPiece());
+				}
+			}
+		}
+
+		// check for attacking black pawns
+		dirs = Pawn.getCaptureDirs(Colour.BLACK);
+		for(byte dir : dirs) {
+
+			byte newPosition = (byte)(square - dir); // '-' because dir is from pawns perspective
+			if(((byte)(newPosition) & 0x88) == 0) {
+
+				if(boardArray[newPosition] != null && boardArray[newPosition].getPiece().getType() == Piece.Type.PAWN) {
+
+					attackingPieces.add(boardArray[newPosition].getPiece());
+				}
+			}
+		}
+		
+		return attackingPieces;
+	}
+	
+	Piece getPieceAt(byte square) {
+		
+		if(boardArray[square] != null) {
+			
+			return boardArray[square].getPiece();
+		}
+		else return null;
+	}
 }
-
-
-
 
 
 

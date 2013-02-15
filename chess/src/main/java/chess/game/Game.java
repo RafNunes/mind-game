@@ -5,6 +5,7 @@
 
 package chess.game;
 
+import chess.piece.Piece;
 import chess.util.Colour;
 import java.util.LinkedList;
 
