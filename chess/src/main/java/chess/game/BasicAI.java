@@ -15,7 +15,7 @@ import chess.util.Colour;
  * 
  */
 
-public class PlayAgainstAI extends AI{
+public class BasicAI implements AI{
 
 	private static final int pawnValue = 10;
 	private static final int rookValue = 50;

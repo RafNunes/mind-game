@@ -12,7 +12,7 @@ import java.util.LinkedList;
 public class Game {
 
 	Board gameBoard = new Board();
-	Player[] players;
+	Object[] players;
 
 	public static void main(String[] args) {
 		Game game;
@@ -27,10 +27,10 @@ public class Game {
 
 	public Game(String args) {
 		gameBoard = new Board();
-		players = new Player[2];
-		players[1] = new AI();
+		players = new Object[2];
+		players[1] = new BestAI();
 		if(args.contentEquals("AI")){
-			players[0] = new PlayAgainstAI();}
+			players[0] = new BasicAI();}
 		else{
 			players[0] = new Human();
 		}
@@ -38,20 +38,6 @@ public class Game {
 
 	public Board getBoard() {
 		return gameBoard;
-	}
-
-	/**
-	 * This calls the board for when a human player makes a move.
-	 * In the final version this should throw an exception for bad moves to the
-	 * UI.
-	 * 
-	 * @param n
-	 *            the player whose turn it is.
-	 */
-	public boolean playerTurn(Move m) {
-		boolean successful = false;
-		gameBoard.tryMove(m);// Needs a check to see whether move was successful
-		return successful;
 	}
 
 	public void run() {
