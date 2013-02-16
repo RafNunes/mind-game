@@ -16,6 +16,8 @@ import chess.util.Colour;
 
 public class AI extends Player{
 	
+	// some utility classes:
+
 	private class Values {
 		
 		public int pawn;
@@ -43,7 +45,6 @@ public class AI extends Player{
 		public int bonusForDefendingSquareByKing;
 	}
 
-
 	private class MoveValuePair {
 		public MoveValuePair(Move m, int v) {
 			move = m;
@@ -63,17 +64,9 @@ public class AI extends Player{
 		}
 	}
 
-	private static final int pawnValue = 10;
-	private static final int rookValue = 50;
-	private static final int bishopValue = 30;
-	private static final int knightValue = 30;
-	private static final int queenValue = 90;
-
 	// Need value >= to absolute value of any position. Cannot use Integer.MAX_VALUE because we need 
 	// to be able to negate it and negate the negation.
 	private static final int maxVal = 999999999;
-
-	private int maxDepth;
 	
 	// if the total value of the material on the board is less than this then we are in the end game
 	private static final int middleGameMinValue = 15;
@@ -83,12 +76,24 @@ public class AI extends Player{
 	private Values currentValues;
 	
 	// first depth we search to for ordering the moves to help alpha-beta make the full depth search quicker 
-	private int gaugingDepth = 4;
+	private int gaugingDepth;
+	private int fullDepth;
+	private int fullDepthWidth; // '-1' to consider all possible moves
+	// this should not be touched. It is automatically set at the right times depending on which of the above are set
+	private int maxDepth;
 	
-	private int fullDepth = 5;
-	private int fullDepthWidth = -1; // '-1' to consider all possible moves
+	private boolean enableQuiescenceCheckDuringGaugeSearch;
+	private boolean enableQuiescenceCheckDuringFinalSearch;
+	// this should not be touched. It is automatically set at the right times depending on which of the above are set
+	private boolean quiescenceCheckEnabled;
 
 	public AI() {
+		
+		gaugingDepth = 4;
+		fullDepth = 5;
+		fullDepthWidth = -1;
+		enableQuiescenceCheckDuringGaugeSearch = false;
+		enableQuiescenceCheckDuringFinalSearch = true;
 		
 		midGameValues = new Values();
 		midGameValues.pawn = 100;
@@ -138,7 +143,7 @@ public class AI extends Player{
 	}
 
 	public Move makeMove(Game game) {
-		
+
 		Board board = game.getBoard();
 		
 		LinkedList<Move> moves = board.generateMoves();
@@ -152,8 +157,10 @@ public class AI extends Player{
 			moveValuePairs.add(new MoveValuePair(m, 0)); // this value will not be used
 		}
 		
-		// assign each a value based on a depth 4 evaluation
+		// initial 'gauge' search
+		
 		maxDepth = gaugingDepth;
+		quiescenceCheckEnabled = enableQuiescenceCheckDuringGaugeSearch;
 		for(MoveValuePair mvp : moveValuePairs) {
 			
 			board.tryMove(mvp.move);
@@ -175,7 +182,10 @@ public class AI extends Player{
 			bestPairs.addLast(moveValuePairs.get(i));
 		}
 		
+		// final full depth search
+		
 		maxDepth = fullDepth;
+		quiescenceCheckEnabled = enableQuiescenceCheckDuringFinalSearch;
 		
 		// this will be overridden unless all moves happen to have value -maxVal
 		MoveValuePair bestPair = new MoveValuePair(moves.getFirst(), -maxVal);
@@ -193,7 +203,7 @@ public class AI extends Player{
 				bestPair = new MoveValuePair(mvp.move, -bestCounter.value);
 			}
 		}
-		
+
 		return bestPair.move;
 	}
 
@@ -202,76 +212,102 @@ public class AI extends Player{
 	// If it finds a move better than the upperBound, it will stop the search and return that move.
 	private MoveValuePair getBestMove(Board board, int currentDepth, int upperBound) {
 
-		if(currentDepth >= maxDepth) {
+		LinkedList<Move> moves = board.generateMoves();
 
-			int value = evaluate(board);
-			return new MoveValuePair(null, value);
+		if(currentDepth >= maxDepth) {
+			
+			// this should be left 'true' if either the position is quiescent or we are not checking for quiescence.
+			// Otherwise 'moves' will be filtered to leave only the dangerous moves and will be searched further.
+			boolean stopHereAndEvaluate = true;
+			
+			if(quiescenceCheckEnabled) {
+				
+				LinkedList<Move> dangerousMoves = filterDangerousMoves(moves);
+				if(dangerousMoves.size() != 0) {
+					
+					stopHereAndEvaluate = false;
+					moves = dangerousMoves;
+				}
+			}
+			
+			if(stopHereAndEvaluate) {
+				
+				int value = evaluate(board, moves);
+				return new MoveValuePair(null, value);
+			}
 		}
+
+		// check for checkmate or stalemate.
+		// For now, we don't like stalemate. In the future, this should depend on how strong a position we are in.
+		if(moves.isEmpty()) return new MoveValuePair(null, -maxVal);
 		else {
 
-			LinkedList<Move> moves = board.generateMoves();
+			// make a list of moveValuePair's for each move, assign a very cheap and rough value to each, and order them accordingly
+			LinkedList<MoveValuePair> moveValuePairs = new LinkedList<MoveValuePair>();
+			for(Move m : moves) {
 
-			// check for checkmate or stalemate.
-			// For now, we don't like stalemate. In the future, this should depend on how strong a position we are in.
-			if(moves.isEmpty()) return new MoveValuePair(null, -maxVal);
-			else {
+				int value = 0;
+				if(m.getCapture() != null) {
 
-				// make a list of moveValuePair's for each move, assign a very cheap and rough value to each, and order them accordingly
-				LinkedList<MoveValuePair> moveValuePairs = new LinkedList<MoveValuePair>();
-				for(Move m : moves) {
+					switch(m.getCapture().getType()) {
 
-					int value = 0;
-					if(m.getCapture() != null) {
-
-						switch(m.getCapture().getType()) {
-
-						case PAWN: value += pawnValue; break;
-						case ROOK: value += rookValue; break;
-						case BISHOP: value += bishopValue; break;
-						case KNIGHT: value += knightValue; break;
-						case QUEEN: value += queenValue; break;
-						default:
-							break;
-						}
-					}
-					
-//					board.tryMove(m);
-//					int value = -evaluate(board); // '-' because from opponents perspective
-//					board.undoMove();
-					
-					moveValuePairs.add(new MoveValuePair(m, value));
-				}
-				Collections.sort(moveValuePairs, new MoveValuePairComparator());
-
-				// this will be overridden unless all moves happen to have value -maxVal
-				MoveValuePair bestPair = new MoveValuePair(moves.getFirst(), -maxVal);
-
-				for(MoveValuePair mvp : moveValuePairs) {
-
-					board.tryMove(mvp.move);
-					MoveValuePair bestCounter = getBestMove(board, currentDepth + 1, -bestPair.value);
-					board.undoMove();
-
-					// if the best counter that the opponent can make to this move is better for us then the previously best move
-					// that we could make, then store this move as the best move that we can make.
-					if(-bestCounter.value > bestPair.value) {
-
-						bestPair = new MoveValuePair(mvp.move, -bestCounter.value);
-
-						// also, it has a chance of being >= to the upperBound
-						if(-bestCounter.value >= upperBound) {
-
-							return bestPair;
-						}
+					case PAWN: value += currentValues.pawn; break;
+					case ROOK: value += currentValues.rook; break;
+					case BISHOP: value += currentValues.bishop; break;
+					case KNIGHT: value += currentValues.knight; break;
+					case QUEEN: value += currentValues.queen; break;
+					default:
 					}
 				}
-				return bestPair;
+
+				moveValuePairs.add(new MoveValuePair(m, value));
 			}
+			Collections.sort(moveValuePairs, new MoveValuePairComparator());
+
+			// this will be overridden unless all moves happen to have value -maxVal
+			MoveValuePair bestPair = new MoveValuePair(moves.getFirst(), -maxVal);
+
+			for(MoveValuePair mvp : moveValuePairs) {
+
+				board.tryMove(mvp.move);
+				MoveValuePair bestCounter = getBestMove(board, currentDepth + 1, -bestPair.value);
+				board.undoMove();
+
+				// if the best counter that the opponent can make to this move is better for us then the previously best move
+				// that we could make, then store this move as the best move that we can make.
+				if(-bestCounter.value > bestPair.value) {
+
+					bestPair = new MoveValuePair(mvp.move, -bestCounter.value);
+
+					// also, it has a chance of being >= to the upperBound
+					if(-bestCounter.value >= upperBound) {
+
+						return bestPair;
+					}
+				}
+			}
+			return bestPair;
 		}
 	}
 	
+	// returns only moves that capture non-pawn pieces
+	private LinkedList<Move> filterDangerousMoves(LinkedList<Move> moves) {
+		
+		LinkedList<Move> dangerousMoves = new LinkedList<Move>();
+
+		for(Move m : moves) {
+			
+			if(m.getCapture() != null && !(m.getCapture() instanceof Pawn)) {
+				
+				dangerousMoves.add(m);
+			}
+		}
+
+		return dangerousMoves;
+	}
+	
 	// evaluates the board from the perspective of whoever's turn it is based on the current state of the board.
-	public int evaluate(Board b) {
+	private int evaluate(Board b, LinkedList<Move> moves) {
 		
 		int whitesMaterial = getMaterial(b, Colour.WHITE);
 		int blacksMaterial = getMaterial(b, Colour.BLACK);
@@ -295,7 +331,7 @@ public class AI extends Player{
 		}
 		
 		// consider num available moves
-		value += b.generateMoves().size() * currentValues.valuePerAvailableMove;
+		value += moves.size() * currentValues.valuePerAvailableMove;
 		value -= b.generateMovesFromOpponentsPerspective().size() * currentValues.valuePerAvailableMove;
 		
 		// consider whether or not castling is still a possibility
@@ -630,20 +666,17 @@ public class AI extends Player{
 	int evaluateKingSafety(Board b, Colour c) {
 
 		int backRow;
-		int finalRow;
 		int forwards;
 		byte kingPos;
 		if(c == Colour.WHITE) {
 
 			backRow = 0;
-			finalRow = 7;
 			forwards = 16;
 			kingPos = b.getWhiteKingPos();
 		}
 		else {
 
 			backRow = 7;
-			finalRow = 0;
 			forwards = -16;
 			kingPos = b.getBlackKingPos();
 		}
@@ -663,7 +696,7 @@ public class AI extends Player{
 		// assign bonus for being near the side
 		if(kingCol <= 1 || kingCol >= 6) value += currentValues.kingClearSideDuringMiddleGame;
 
-		// check wether squares between king and side are empty
+		// check whether squares between king and side are empty
 		boolean empty = true;
 		for(byte nextSquare = (byte)(towardsSide + kingPos); (nextSquare & 0x88) == 0; nextSquare += towardsSide) {
 
