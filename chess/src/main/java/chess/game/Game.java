@@ -30,7 +30,7 @@ public class Game {
 		players = new Object[2];
 		players[1] = new BestAI();
 		if(args.contentEquals("AI")){
-			players[0] = new BasicAI();}
+			players[0] = new BestAI();}
 		else{
 			players[0] = new Human();
 		}

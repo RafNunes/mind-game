@@ -14,6 +14,21 @@ import chess.util.Colour;
  * 
  */
 
+/*
+ * Fri 8th Craig Martin Change log
+ * 
+ * Bishop now worth 330 re discussion with David Watt
+ * No castling bonus in end game
+ * 
+ * King defence bumped up. From discussion with David Watt an unprotected King that is under attack could be worth up to a queen
+ * By this logic (and the fact the king can have 9 squares round it) each piece defending a king should be worth 1/2 pawn (18th of a queen)
+ * and any piece attacking the squares round a king should incur a penalty of 1/2 pawn (1/18 of a queen)
+ * 
+ * Values for occupying central squares updated to values given from David McKenna
+ * 
+ * Endgame searches to depth 6, David Watt's suggestion 5/03/13
+ */
+
 public class BestAI implements AI{
 	
 	// some utility classes:
@@ -93,25 +108,25 @@ public class BestAI implements AI{
 		fullDepth = 5;
 		fullDepthWidth = -1;
 		enableQuiescenceCheckDuringGaugeSearch = false;
-		enableQuiescenceCheckDuringFinalSearch = true;
+		enableQuiescenceCheckDuringFinalSearch = false;
 		
 		midGameValues = new Values();
 		midGameValues.pawn = 100;
 		midGameValues.rook = 500;
 		midGameValues.knight = 300;
-		midGameValues.bishop = 300;
+		midGameValues.bishop = 330;
 		midGameValues.queen = 900;
 		midGameValues.valueForAttackingInnerCenralSquare = 7;
 		midGameValues.valueForAttackingOuterCenralSquare = 3;
-		midGameValues.valueForOccupyingInnerCentralSquare = 7;
-		midGameValues.valueForOccupyingOuterCentralSquare = 3;
+		midGameValues.valueForOccupyingInnerCentralSquare = 20;
+		midGameValues.valueForOccupyingOuterCentralSquare = 10;
 		midGameValues.valueForPotentialCastle = 20;
 		midGameValues.valuePerAvailableMove = 6;
 		midGameValues.kingOnBackRowDuringMiddleGame = 20;
 		midGameValues.kingClearSideDuringMiddleGame = 20;
 		midGameValues.kingPawnGuardBonus = 20;
-		midGameValues.penaltyForOpponentAttackingSquareByKing = -10;
-		midGameValues.bonusForDefendingSquareByKing = 6;
+		midGameValues.penaltyForOpponentAttackingSquareByKing = -50;
+		midGameValues.bonusForDefendingSquareByKing = 50;
 		midGameValues.sidePawnPenalty = -30;
 		midGameValues.doubledPawnPenalty = -20;
 		midGameValues.isolatedPawnPenalty = 10;
@@ -122,16 +137,16 @@ public class BestAI implements AI{
 		endGameValues.pawn = 100;
 		endGameValues.rook = 500;
 		endGameValues.knight = 300;
-		endGameValues.bishop = 300;
+		endGameValues.bishop = 330;
 		endGameValues.queen = 900;
 		endGameValues.valueForAttackingInnerCenralSquare = 7;
 		endGameValues.valueForAttackingOuterCenralSquare = 3;
-		endGameValues.valueForOccupyingInnerCentralSquare = 7;
-		endGameValues.valueForOccupyingOuterCentralSquare = 3;
-		endGameValues.valueForPotentialCastle = 20;
+		endGameValues.valueForOccupyingInnerCentralSquare = 20;
+		endGameValues.valueForOccupyingOuterCentralSquare = 10;
+		endGameValues.valueForPotentialCastle = 0;
 		endGameValues.valuePerAvailableMove = 6;
-		endGameValues.penaltyForOpponentAttackingSquareByKing = -10;
-		endGameValues.bonusForDefendingSquareByKing = 6;
+		endGameValues.penaltyForOpponentAttackingSquareByKing = -50;
+		endGameValues.bonusForDefendingSquareByKing = 50;
 		endGameValues.sidePawnPenalty = -30;
 		endGameValues.doubledPawnPenalty = -20;
 		endGameValues.isolatedPawnPenalty = 10;
@@ -314,8 +329,11 @@ public class BestAI implements AI{
 		
 		int totalMaterial = whitesMaterial + blacksMaterial;
 		if(totalMaterial > middleGameMinValue) currentValues = midGameValues;
-		else currentValues = endGameValues;
-		
+		else{ currentValues = endGameValues;
+		gaugingDepth = 5;
+		fullDepth = 6;
+		System.out.println("ITS ENDDDDGAMEMEMEMEMEMEMKEMEM");
+		}
 		int value = 0;
 		Colour ourColour = b.getThisPlayer();
 		Colour theirColour = b.getOtherPlayer();
