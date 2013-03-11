@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import chess.piece.Piece;
+import chess.ui.CommandUI;
 
 public class CommandUITest {
 

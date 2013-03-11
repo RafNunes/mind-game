@@ -5,91 +5,88 @@
 
 package chess.game;
 
-import chess.piece.Piece;
-import chess.util.Colour;
-import java.util.LinkedList;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+import chess.ui.CommandUI;
+import chess.ui.UI;
+import chess.ui.XboardUI;
 
 public class Game {
 
-	Board gameBoard = new Board();
-	Object[] players;
+	private static UI ui;
+	private static Board gameBoard;
+	private static AI ai;
 
 	public static void main(String[] args) {
-		Game game;
-		if(args.length == 0){
-			game = new Game("");
-		}
-		else{
-			game = new Game(args[0]);
-		}
-		game.run();
-	}
-
-	public Game(String args) {
-		gameBoard = new Board();
-		players = new Object[2];
-		players[1] = new BestAI();
-		if(args.contentEquals("AI")){
-			players[0] = new BestAI();}
-		else{
-			players[0] = new Human();
-		}
+		Game.run();
 	}
 
 	public Board getBoard() {
 		return gameBoard;
 	}
 
-	public void run() {
+	public static void run() {
+		BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 
-		CommandUI ui = new CommandUI();
-		int turn = 0;
-		boolean gameOver = false;
-		ui.displayBoard(gameBoard.getPieces());
-		while(!gameOver) {
+		// Create new game and AI engine
+		gameBoard = new Board();
+		ai = new BestAI();
+		// By default, use the command line UI
+		ui = new CommandUI();
+		String input;
+		do {
+			try {
+				input = stdin.readLine();
 
-			LinkedList<Move> legalMoves = gameBoard.generateMoves();
-			if(legalMoves.isEmpty()) gameOver = true;
-			else {
-
-				Move move = null;
-
-				if(players[turn] instanceof Human) {
-
-					ui.displayLegalMoves(legalMoves);
-					while(move == null) {
-
-						String moveInput = ui.getMoveInput();
-						for(Move m : legalMoves) {
-
-							if(m.matches(moveInput)) move = m;
-						}
-					}
+				if (input.equals("new")) {
+					// Start a new game
+					ai = new BestAI();
+					gameBoard = new Board();
+				} else if (input.equals("quit")) {
+					break;
+				} else if (input.equalsIgnoreCase("xboard")) {
+					ui = new XboardUI();
+				} else {
+					ui.processInput(input);
 				}
-				else {
-					long start = 0;
-					long end = 0;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} while (true);
+	}
 
-					start = System.currentTimeMillis();
-					move = ((AI)players[turn]).makeMove(this);
-					System.out.println(move);
-					end = System.currentTimeMillis();
-					long result = end - start;
-					System.out.println(result);
-				}
-				gameBoard.makeMove(move);
-				ui.displayBoard(gameBoard.getPieces());
+	public static void write(String output) {
+		System.out.println(output);
+		System.out.flush();
+	}
 
-				turn = (turn + 1) % 2;
+	public static void undo() {
+		gameBoard.undoMove();
+	}
+
+	public static void setToHard() {
+		// TODO Auto-generated method stub
+
+	}
+
+	public static void setToEasy() {
+		// TODO Auto-generated method stub
+
+	}
+
+	public static void move(String input) {
+		Move thisMove = null;
+		Move nextMove = null;
+		for (Move move : gameBoard.generateMoves()) {
+			if (move.matches(input)) {
+				thisMove = move;
 			}
 		}
-		if(gameBoard.inCheck((turn == 0) ? Colour.WHITE : Colour.BLACK)) {
-
-			ui.displayWinner((turn + 1) % 2);
-		}
-		else {
-
-			ui.displayStalemate();
+		if (thisMove != null) {
+			gameBoard.makeMove(thisMove);
+			nextMove = ai.makeMove(gameBoard);
+			write("move " + nextMove.toString().replaceAll("][- ", ""));
 		}
 	}
 }
