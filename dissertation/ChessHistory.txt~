@@ -1,0 +1,65 @@
+Over the course of the first few week all the members of the team looked over the history of computer chess. This was done to attain a better knowledge of the projects that had been done before us, but also to get an idea of the difficulties we would face while designing and implementing the chess program. \\
+Even before computers were advanced enough to play chess, in 1947 British scientist Alan Turing designed the first program for playing chess and tested by hand writing each step the program would make.\cite{1} In 1950, American scientist Claude Shannon published a paper named "Programming A Computer For Playing Chess" in which he sets out several key concepts that are still used in chess programming to this day and feature in our project. Among them is two different ways to traverse the game tree in search of the best moves. Firstly "Type A" considers every move in the tree. On the other hand "Type B" which would search through the moves in a more dynamic fashion. \cite{2} In his paper Shannon sees Type B as a much more effective search. However both of these techniques are considerably slower than the algorithms and techniques discovered in later years. \\
+The first machine that could legitimately compute and play chess, albeit to a low standard, was the I.B.M 704. The machine took eight minutes to execute a move and was described by Chess Review Magazine in as playing at a sub-amateur level however it was praised for
+ "never leaving a piece en prise" and it was also stated "it can be seen the level of its chess playing could be considerably improved were this program be adapted for a bigger and faster machine". \cite{3} \\
+By the 1960s, computers were available in most universities leading to a mass improvement of chess programs and techniques widely used in today's chess programs were being discovered such as combining minimax with alphabeta to create a much more efficient search of the game tree. These advancements meant that by 1967 computers were beginning to enter tournaments and beat amateur players \cite{4} however even the best chess engines were still too slow and easily beaten.  \\
+It was after this time in the late 1960s and early 1970s that computers began to radically increase in speed. At the same time with computing science becoming much more accepted as a scientific discipline many more scientist were exploring programming and with it computer chess. \cite{5} It was during the 70s that there was again several more leaps in chess programming with a lot of research being done into two different styles of considering moves. The first style attempted to allow the computer to choose moves based on patterns in a similar way to what humans do. However, this proved to be very complicated and the majority of programmers focused on a brute force method which examined all potential moves that was not cut off by minimax or alphabeta. This technique proved to be much more successful and was carried on in many chess engines and is also the technique used in this project. Around this time other major advancements were made in a hope to improve chess playing. these included Chess Hash Tables, Iterative Deepening, Bit Boards and many others. \cite{6} \\
+However, even with these advancements could still not beat the very best chess players and it was not until the 1988 when serious challengers were created in the form of computer chess engines. It was in this year that the I.B.M's Deep Thought system stunned the chess world when it beat Grandmaster Larson. This was the first time an A.I. chess player had beaten a grandmaster under tournament rules.\cite{7} After this victory the quality of chess engines began to increase at a huge rate and in 1997 the successor to Deep Thought known as Deep Blue won against the then current world chess champion Kasparov proving that hard computation could beat human though \cite{8} \\
+
+
+
+
+
+
+
+
+
+
+
+\bibitem{1}
+  Computer Chess Museum,
+  \emph{\Opening Game: Origins of Computer Chess}.
+  http://www.computerhistory.org/chess/main.php?sec=thm-42b86c2029762&sel=thm-42b86c3224944,
+  Last accessed: 9/03/2013.
+
+\bibitem{2}
+  Shannon, Claude E. ,
+  \emph{\XXII. Programming a Computer for Playing Chess}.
+  Philosophical Magazine, Ser.7, Vol. 41, No. 314,
+  March 1950.
+1
+\bibitem{3}
+  Berstein, Alex ,
+  \emph{A Chess Playing Program For The I.B.M 704}
+  Chess Review Magazine, Vol. 26, No. 7,
+  July 1958.
+
+\bibitem{4}
+ Computer Chess Museum,
+  \emph{\Opening Game: Origins of Computer Chess: Getting Going}.
+  http://www.computerhistory.org/chess/main.php?sec=thm-42b86c2029762&sel=thm-42b86c7bdbaf1,
+  Last accessed: 9/03/2013.
+
+\bibitem{5}
+  Computer Chess Museum,
+  \emph{Middle Game: Computer Chess Comes of Age}.
+  http://www.computerhistory.org/chess/main.php?sec=thm-42eeabf470432,
+  Last accessed: 12/03/2013.
+
+\bibitem{6}
+  Computer Chess Museum,
+  \emph{Middle Game: Computer Chess Comes of Age: Fast and Efficent Searching}.
+  http://www.computerhistory.org/chess/main.php?sec=thm-42eeabf470432&sel=thm-42f15c6fb49f2#,
+  Last accessed: 12/03/2013.
+
+\bibitem{7}
+  Byrne Robert,
+  \emph{Chess-Playing Computer Closes In On Champions}.
+   New York Times,
+  September 1989.
+  
+\bibitem{8}
+  I.B.M
+  \emph{Deep Blue}
+  http://www-03.ibm.com/ibm/history/ibm100/us/en/icons/deepblue/
+  Last accessed: 12/03/2013
