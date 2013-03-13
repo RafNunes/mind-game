@@ -380,6 +380,7 @@ public class BestAI implements AI {
 			currentValues = endGameValues;
 			gaugingDepth = 5;
 			fullDepth = 6;
+			System.out.println("ITS ENDDDDGAMEMEMEMEMEMEMKEMEM");
 		}
 		int value = 0;
 		Colour ourColour = b.getThisPlayer();
