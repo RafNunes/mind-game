@@ -1,0 +1,287 @@
+% Modified 
+
+\documentclass{l3proj}
+
+\usepackage{url}
+
+\begin{document}
+\title{Team H: Mind Game}
+\author{Jarana Manotumruksa\\
+	Craig Martin \\
+	David McKenna \\
+	Rafael Nunes \\
+	Demian Till \\
+	}
+\maketitle
+\begin{abstract}
+
+The abstract goes here
+
+\end{abstract}
+\educationalconsent
+\tableofcontents
+%==============================================================================
+\chapter{Introduction}
+\label{intro}
+% To be updated
+
+This report attempts to introduce the mind-game team project that me and my team are
+working on, explaining the nature of the project, the direction in which we have decided to
+go and some of the things we have learnt.
+
+The reader of this report is expected to be familiar with terms and concepts related to
+general computer science but not necessarily artificial intelligence. The reader is also
+expected to be familiar with the game of chess.
+
+Mind games are games in which there is no element of luck. The outcome of every action
+can be precisely calculated allowing, in theory, a player with enough time on their hands to
+play perfectly. In other words, such a game can be ‘solved’ in theory.
+
+Of the many popular mind games, we thought that chess would best fit our purposes.
+Playing a game of chess is complicated enough a problem to be well beyond being solved
+by any foreseeable computer. This means that subtler techniques need to be employed in
+order to create an AI that can play effectively such as estimating the value of different
+positions that could occur in the future and using these estimates to narrow down which of
+the available moves should be considered further when taking a turn. This provides
+interesting programming and intellectual challenges.
+
+Another point in favour of chess is that the rules are complicated enough to provide furtherar
+programming challenges. There are many different pieces, each with different ways of
+moving and capturing. Additionally, some moves rely on what has happened previously in
+the game such as castling which relies on the king and the rook never having moved, and
+en passant which is available only for a single turn after a particular event has occurred.
+Also, checking for stalemate requires comparing previous positions for repetition.
+
+Finally, chess was the only mind game fulfilling the above criteria with which every
+member of the team was familiar. It is also one of the most popular games in the world,
+which will make it all the more satisfying to build an AI for.
+
+Unlike some of the other projects, a huge amount of work has already been done on the
+particular problem of writing chess AIs. With our very limited resources, we have
+absolutely no chance of bettering existing projects in any way, with the possible exception
+of adding some innovative UI features. This means that we have rather modest aims
+relative to the current state of the art.
+
+Following requirements gathering and discussion with the project supervisor, we are
+aiming, at the minimum, to build a chess AI that can consistently beat a novice player,
+obeying and accounting for all rules of the game with the possible exceptions of en
+passant and stalemate, along with a functional UI displaying the state of the game and
+allowing the player to make moves. The AI would need to guarantee making moves within
+a short time frame, say, 0 – 20 seconds on a typical home computer.
+
+If time allows, we aim to make an AI capable of beating a fairly skilled player,
+acknowledging the full rule set, providing many more UI features such as displaying legal
+moves, displaying previously played moves, allowing the user to undo moves and saving
+and loading games. We would also like to offer multiple difficulty levels/playing styles and
+enable the AI to play effectively to a clock, aborting the search before time runs out and
+playing the best move according to the most accurate estimates made so far.
+
+The extensive past work on the subject offers a rich pool of knowledge to guide our efforts.
+The standard basis of a chess AI is a min-max search algorithm. It estimates the value of
+each available move by observing the tree of following positions rooted at each. That is, it
+considers the moves that the opponent could make in response to each of ours, and the
+moves that we could make in response to each of the opponent’s moves and so on until
+some fixed depth. For the resulting positions at this maximum depth, it estimates their
+values using an ‘evaluation function’ which takes into account qualities of the positions
+such as the difference in material value between the two sides. Now, assuming a faultless
+opponent, it finds the estimated values of each of the AI’s available moves from the
+current position by taking the worst (from the AI’s perspective) of the moves that the
+opponent could make in response. The values of each of the opponent’s moves are found
+by taking the best (again, from the AI’s perspective) of the moves that we could make in
+response. It continues like this until it gets to the maximum depth, at which point it simply
+uses the estimates made by the evaluation function.
+
+A standard modification to this search pattern is called alpha-beta pruning, which reduces
+the number of positions that must be searched by using the fact that some branches of the
+search tree cannot influence the decision. For example, if we are trying to find the best of
+two moves and one of the moves was estimated to have value -8 based on the 2 moves
+that the opponent could make in response which had values -4 and -8, and we find that
+one of the opponents responses to the other move that we could make had value -10, then
+we know that we will not play the latter move since -10 is already worse that the worst
+outcome of playing the former move. We don’t need to find the value of the other move
+that the opponent could make in response because it could only make it worse.
+
+Alpha beta pruning yields the most benefit if a cheap algorithm is used to order the moves
+from a given position based on the expected utility for the player making the move. This
+will increase the chances of better moves being found before lesser ones, allowing the
+searches rooted at the lesser moves to be abandoned as soon as they are discovered to be
+as such.
+
+The above search strategy applied to chess assumes the search of the tree being cut off at
+a certain point, using an evaluation function to estimate the value of the reached positions
+simply by studying the state of the board as it is. However, using a naive cut-off point such
+as having reached a certain depth can lead to problems when a move is chosen based on
+a future position looking relatively good when actually, if the search had gone one level
+deeper, it would have revealed a major change in direction such as the loosing of a queen.
+This can be avoided by using a more sophisticated algorithm for deciding when to cut off
+the search based on the level of activity of the position. For example, the search is cut off
+if the depth is greater than some set depth AND no major pieces can be taken on the next
+turn. This strategy is called quiescence.
+
+Another trick we learnt was a way of representing the board to make legal moves very
+easy and quick to generate. Using a 128 cell array rather than a 64 cell one and only using
+every other 8 cells to refer to squares on the board (0 – 7, 16 – 23, and so on) allows
+positions which are not on the board to be easily checked for. All indices in the other set of
+cells (8 – 15, 24 – 31, and so on) have a high value for their 4th bit and thus will yield a nonzero
+number when combined in a bit-wise AND operation with the number 0x88
+(10001000). Similarly, all indices higher than 127 (or lower than zero if 8-bit two’s
+compliment indices are used) will contain a high value for their 8th bit and so too will yield
+a non-zero value when combined with 0x88.
+
+So far, we have produced a program capable of arbitrating legal play (with a couple of
+exceptions) between two humans playing at a command line interface. It can also replace
+one or both of the human players with an AI using a simple min-max search and an
+evaluation function which only takes into account the value of material on the board.
+
+The next step is to add alpha-beta pruning and quiescence search, iterative deepening
+(continuously re-doing the search, each time to a greater depth, possibly discarding moves
+which were estimated to be poor in previous iterations). All the while we will be
+researching and experimenting with new evaluation functions as well as developing a more
+sophisticated UI.
+
+The rest of the dissertation will detail the process and results of requirements gathering,
+and then go on to explain the final design of our program and the process that lead to it.
+
+\section{Basic Chess Components} 
+
+\subsection{Piece and Board Representation}
+
+	One of the first problems that must be considered when designing a chess engine is how the board and the pieces will be represented in memory. A well-implemented board representation aids the system not just in ease of programming, but also overall performance. Ideally, the implementation will aid the programmer in locating pieces, identifying the colour and type of pieces, move generation, and checking for illegal moves. A poor implementation will result in more design issues later, as finding pieces and move generation become difficult and require large amounts of manual hard-coded checking to be done, which in turn results in a large performance drop. As such, it is important to consider the representation that will be chosen in the engine.
+
+\subsubsection{Board Representation}
+
+	Many factors have to be considered when designing the chess engine's board storage. Originally, it was beneficial to use the smallest possible data structure, as memory space was small and efficient usage of the limited space was necessary. Since memory space is no longer the issue it used to be, modern chess engines aim for speed, efficiency and ease of use with regards to move generation, checking for illegal moves etc. Boards must also store other information about the game, such as the time until stalemate and eligibility to castle, but these can be stored as simple boolean objects with little difficulty compared to the structure of the board itself. Numerous data structures have been developed to represent boards in memory.
+
+\subsubsection{One/Two-dimensional Array}
+\paragraph
+	The simplest representation of a board is a single 64 element array, with each square being numbered horizontally from one corner of the board. This uses up the least amount of space, and initially appears to make moving a piece simple: By simply changing the index of a piece by a number that the piece is legally allowed to move by, the new location can be determined. An alternate form uses a two dimensional 8x8 array, which presents a simple mapping of rank and file as shown in a real chess board with a minimal increase in complexity for determining movement. 
+
+\paragraph
+	However, problems arise when trying to determine illegal moves that take place off the edge of the board. As long as a piece can move unopposed by other pieces, it can travel through one side of the board and emerge on the next or previous rank of the other side. For example, a rook at h4, the far right of the board, could travel right and emerge on a5. Assuming  that it did not encounter any other pieces, the rook could travel anywhere on the board by moving horizontally. Dealing with this problem results in a massive decrease in performance as every instance of this possibility must be checked to ensure that a piece cannot move off the board.
+
+\subsubsection{Border Squares}
+
+	A solution to this problem is to enlarge the array used to store the board to include border spaces, which signify the edge of the board. Typically, two border squares are used at the ends of each file, and one on both sides of each rank. These squares contain a value to signify the end of the board, and as such any piece that moves on them is committing an illegal move. Two squares are necessary for the border as the knight is a stepping piece and as such can move two squares without passing through the first; only one border square is necessary on each side as any two-square stepping move will wrap around onto the border square on the other side. This eliminates the issue with checking illegal moves with only a small increase in memory space required.
+
+\subsubsection{0x88 Method}
+\paragraph
+Another method used to represent boards is the 0x88 method, which uses the shape of the board and properties of hexadecimal numbers to determine illegal moves. The data structure used is an array of 128 elements, which is arranged as two identical chess boards side by side, with the numbering continuing horizontally across both boards before wrapping around to the next rank. The left board is used to contain the legal squares, while the right contains illegal ones; since two boards side by side produce 16 squares for each rank, certain hexadecimal properties hold with regards to the index of each square. When performing a bitwise and operation with the hexadecimal number 0x88 (10001000), any square on the right side of the board will result in a non-zero value, while every square on the left will result in zero. In this way, every illegal move can be determined with the same simple check.
+\paragraph
+The 0x88 method is more efficient than the border-controlled data structure, as there is no need to initialise the board with the illegal value.
+
+\subsubsection{Bitboard}
+
+The bitboard technique uses a number of 64-bit words to represent different aspects of the board, with each square containing a single bit to represent its state with regard to that aspect. For example, one word may contain the location of white pawns, while another will contain the position of one side's rooks. This allows the engine to take advantage of quick bitwise operations for each aspect of the board,  and stores a large amount of data in a very small format.
+
+\subsubsection{Piece representation}
+
+Having decided on a particular data structure for the board used by the engine, it is now necessary to choose a representation for pieces in the game. Again, the simplest option would be to represent each piece as an integer. Each number would represent a different kind of piece, with positive and negative numbers used to differentiate colour.
+
+	Immediately, several issues arise with this choice. The piece cannot know its own rules for movement, being simply a number. Movement must be checked when the piece tries to move in a lengthy and unwieldy test. In addition, it is difficult to find the location of all of one side’s pieces; a search of the whole board must be carried out.
+
+	It is more efficient to introduce a separate structure to represent pieces on the board. Ideally, the location and type of all pieces for one colour can be used, cutting down the search time required to find a specific piece. In addition, a piece can store its own movement information, making the process of move generation and checking for illegal moves more streamlined.
+
+\subsection{Artificial Intelligence}
+
+The development of a chess artificial intelligence requires multiple components to be working together to produce a quick, clever response to any board layout. A balance must be struck between speed and performance, for a complex evaluator will produce a good move but will spend unmanageable amounts of time doing so.
+
+\subsubsection{Move generation}
+
+The first step in the artificial intelligence evaluation process for each move made by the AI is the generation of all available moves from the current board position. The representation of the board and pieces helps greatly in this task, as each available piece must be checked to find all moves it can make that are not illegal. When all available moves have been found, they are added to the game tree for that position.
+
+\subsubsection{The Game Tree}
+
+The game tree is a data structure containing potential moves. Starting from the current position of the board, all available moves are generated and added to the tree. Then, for each of these moves, potential responses that could be made by the opponent on their move are generated, and this continues until a determined depth has been reached.
+
+	The amount of moves in the game tree increases exponentially with each level of depth, as the opening alone consists of twenty available moves, and this number only increases as the game moves forward.. The depth to which the game tree is generated is a massive factor in the performance of the AI for the simple reason that more moves generated means more moves to evaluate. An AI using a smaller game tree will make faster moves, but one with a larger game tree will be able to see further ahead into the game and thus make more informed moves. Iterative deepening can be used, which allows the AI to generate more moves to see further into situations that may be positive for it without forcing a search of another level of the entire tree.
+
+\subsubsection{Searching algorithms}
+
+	Having created the game tree, it is now necessary to search through it to find the best move.  A human mind examines several moves that are likely to be beneficial and follows them to various lengths to find their likely best choice. Machines, however, cannot choose moves in the same way and must perform an exhaustive search of the game tree. There are many algorithms developed for this purpose, the simplest of which is Minimax, which searches through every node in the tree and evaluates every one. Obviously for larger game trees this quickly becomes incredibly slow, and much of the evaluator's time is wasted checking pointless moves that have already been found to result in no positive score for the AI.
+
+	By pruning the tree a quicker search can be performed, such as in the Alphabeta algorithm which immediately stops searching a branch if it can be determined that any result from that point on will be worse than an option that has been found to be the best possible move thus far. In this way, a tree of significant depth can be searched while maintaining a decent speed.
+
+	Preferably, a good move will be found quickly, allowing the search algorithm to discard more of the pointless moves. Ordering moves in the tree is useful in this regard, placing moves that are likely to produce good results first. Moves that result in check are often ordered first, as these moves often have few responses, followed by moves that take pieces as these moves are likely to be beneficial to the AI taking them(material being the main factor in the production of a side's score).
+
+\subsubsection{Evaluator}
+
+	The evaluator is the part of the AI that determines the score of each move, and is applied to each position in the game tree reached by the search algorithm. The development of a sophisticated evaluator is essential to the creation of a skilled AI, as the engine will make its moves according to the decisions of the evaluator.
+
+	Each position is analysed based on different factors, many of which can be included or not included to improve the skill or speed of the chess engine respectively. The primary factor is the material each player has available to them; taking a piece carries a large score decrease for the player whose piece is lost. Because of this, moves that lead to pieces being taken are often chosen by the evaluator, unless the opponent can respond with a move which results in the loss of a more valuable piece.  Other factors that can be included in the evaluator include board control(the amount of space one player currently has pieces attacking), king safety, the availability of castling, and the development of more valuable pieces to an advantageous position where they can move about freely.
+
+When evaluating through the game tree, one side will aim to produce the highest positive score, while the other side will make moves to produce the lowest negative score. In this way, either side's gain is the other's loss. The evaluator will move through the game tree, applying a score modifier to the resulting position each move creates, and then a corresponding score modifier to each response produced by the other side. When the game tree has been fully evaluated, either because there are no moves left to check at this depth or it has been determined that no other move could produce a better result for the side whose move is being considered, the AI will make its move according to the series of actions that will produce the most favourable outcome(with the assumption that the opposing side will respond in a way that is favourable for them).
+
+\section{History of Computer Chess}
+
+Over the course of the first few week all the members of the team looked over the history of computer chess. This was done to attain a better knowledge of the projects that had been done before us, but also to get an idea of the difficulties we would face while designing and implementing the chess program. \\\\
+Even before computers were advanced enough to play chess, in 1947 British scientist Alan Turing designed the first program for playing chess and tested by hand writing each step the program would make.\cite{MuseumOrigins} In 1950, American scientist Claude Shannon published a paper named "Programming A Computer For Playing Chess" in which he sets out several key concepts that are still used in chess programming to this day and feature in our project. Among them is two different ways to traverse the game tree in search of the best moves. Firstly "Type A" considers every move in the tree. On the other hand "Type B" which would search through the moves in a more dynamic fashion. \cite{ProgrammingPlaying} In his paper Shannon sees Type B as a much more effective search. However both of these techniques are considerably slower than the algorithms and techniques discovered in later years. \\\\
+The first machine that could legitimately compute and play chess, albeit to a low standard, was the I.B.M 704. The machine took eight minutes to execute a move and was described by Chess Review Magazine in as playing at a sub-amateur level however it was praised for
+ "never leaving a piece en prise" and it was also stated "it can be seen the level of its chess playing could be considerably improved were this program be adapted for a bigger and faster machine". \cite{IBM704} \\\\
+By the 1960s, computers were available in most universities leading to a mass improvement of chess programs and techniques widely used in today's chess programs were being discovered such as combining minimax with alphabeta to create a much more efficient search of the game tree. These advancements meant that by 1967 computers were beginning to enter tournaments and beat amateur players \cite{MuseumGoing} however even the best chess engines were still too slow and easily beaten.  \\\\
+It was after this time in the late 1960s and early 1970s that computers began to radically increase in speed. At the same time with computing science becoming much more accepted as a scientific discipline many more scientist were exploring programming and with it computer chess. \cite{MuseumMiddle} It was during the 70s that there was again several more leaps in chess programming with a lot of research being done into two different styles of considering moves. The first style attempted to allow the computer to choose moves based on patterns in a similar way to what humans do. However, this proved to be very complicated and the majority of programmers focused on a brute force method which examined all potential moves that was not cut off by minimax or alphabeta. This technique proved to be much more successful and was carried on in many chess engines and is also the technique used in this project. Around this time other major advancements were made in a hope to improve chess playing. these included Chess Hash Tables, Iterative Deepening, Bit Boards and many others. \cite{MuseumSearch} \\\\
+However, even with these advancements could still not beat the very best chess players and it was not until the 1988 when serious challengers were created in the form of computer chess engines. It was in this year that the I.B.M's Deep Thought system stunned the chess world when it beat Grandmaster Larson. This was the first time an A.I. chess player had beaten a grandmaster under tournament rules.\cite{NewYork} After this victory the quality of chess engines began to increase at a huge rate and in 1997 the successor to Deep Thought known as Deep Blue won against the then current world chess champion Kasparov proving that hard computation could beat human thought \cite{DeepBlue} \\\\
+While this victory was immensely important, it should also be noted that Deep Blue was not just a piece of software for playing chess, it was also an entire system. All the hardware was built specifically for playing chess. However as time went on it became possible to harness this kind of power on a home computer. As of this date, the highest ranked chess engine in the world is available for download onto a modern Windows machine. \cite{Houdini} While the scope of these systems are entirely out of our league it was beneficial to learn the history of chess to understand fundamental parts of chess programming such as; why certain algorithms are used, the best ways to search the trees and what could be done to improve our chess engine. \\\\
+%==============================================================================
+\chapter{Design}
+\label{design}
+
+..
+
+%==============================================================================
+\chapter{Implementation}
+\label{impl}
+
+In this chapter, we describe how the implemented the system.
+
+%------------------------------------------------------------------------------
+\section{User Interface}
+
+Blah blah blah
+Blah blah blah
+Blah blah blah
+Blah blah blah
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\subsection{Foo}
+
+Blah blah blah
+Blah blah blah
+Blah blah blah
+Blah blah blah
+
+%------------------------------------------------------------------------------
+\section{Database Model}
+
+\begin{enumerate}
+\item Blah blah blah
+\item Blah blah blah
+\item Blah blah blah
+\item Blah blah blah
+\end{enumerate}
+
+
+
+%==============================================================================
+\chapter{Evaluation}
+
+We evaluated the project by...
+
+%==============================================================================
+\chapter{Conclusion}
+
+A great project!
+
+%==============================================================================
+\section{Contributions}
+
+Here we explain that Lewis Carroll wrote chapter \ref{intro}. John Wayne
+was out riding his horse every day and didn't do anything. Marilyn Monroe
+was great at getting the requirements specification and coordinating the
+writing of the report. Betty Davis did the coding of the kernel of the
+project, described in Chapter \ref{impl}.  James Dean handled the
+multimedia content of the project.
+
+%==============================================================================
+\bibliographystyle{plain}
+\bibliography{reportinprogress}
+\end{document}
