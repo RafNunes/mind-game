@@ -1,0 +1,5 @@
+Playing from positions 
+
+In order to get a more detailed analysis of the changing ability of the chess AI it was suggested that we try create positions and run the game from there. In this way we could measure subtle changes by creating positions where this change would aid our AI. For example, to measure the effect of changing the weighting of King safety, a position could be created where the king is exposed and, depending on weighting, pieces will either rush to defend their King or leave it out in the open.
+
+While this was a good idea it was very difficult to achieve. Firstly choosing positions required a lot of thought to choose the best ones. Unfortunately due to the way our game was set up it was also very difficult and time consuming to create these positions. In the end it was decided that creating several of these positions would not have been worth so instead we focused upon the start game moves.
