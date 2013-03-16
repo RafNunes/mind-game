@@ -31,10 +31,6 @@ public class BasicAI implements AI {
 	// to be able to negate it and negate the negation.
 	private static final int maxVal = 999999999;
 
-	/**
-	 * Used for King position evaluation
-	 */
-
 	private boolean endgame = false;
 
 	private class MoveValuePair {
