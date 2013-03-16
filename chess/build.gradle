@@ -17,7 +17,7 @@ jar {
     
     manifest {
         attributes(
-            "Main-Class":"chess.launcher.Game",
+            "Main-Class":"chess.game.Game",
             "Class-Path":configurations.runtime.files.name.join(", ")
         )
     }
