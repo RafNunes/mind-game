@@ -1,0 +1,19 @@
+This project was evaluated in five key phases, each with different strategies to go along with different the different iterations of the project. These five phases were:
+
+\begin{itemize}
+\item Unit testing of early simple components.
+\item Informal Testing of the rules.
+\item Playing the engine against itself.
+\item Playing from positions.
+\item Formal Evaluation of project.
+\end{itemize}
+
+While implementing the early stages of the chess program it was essential that the most basic components worked. With this in mind two JUnit tests were set-up. The first focused on the piece class, which was explained in the design section. The tests attempted to create pieces of various types (i.e. White King) and test the following three things:
+
+1) The correct colour could be retrieved from the piece using getColour().
+
+2) The pieces class could be retrieved to confirm it was either a stepping piece, sliding piece or a pawn.
+
+3) The piece could be added to board in any position and that same position could be retrieved as a byte variable.
+
+Secondly the move class had to be tested. This was implemented straight after the piece class was tested and simply checked that a piece could be moved from one position to another successfully. These are fundamental classes and very easy to test. Therefore, it seemed appropriate to set aside a few hours to test classes that, if left untested, could have had lasting consequences.

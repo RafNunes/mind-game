@@ -1,0 +1,15 @@
+\BOOKMARK [0][-]{chapter.1}{Introduction}{}
+\BOOKMARK [1][-]{section.1.1}{Basic Computer Chess Components}{chapter.1}
+\BOOKMARK [2][-]{subsection.1.1.1}{Piece and Board Representation}{section.1.1}
+\BOOKMARK [2][-]{subsection.1.1.2}{Artificial Intelligence}{section.1.1}
+\BOOKMARK [1][-]{section.1.2}{History of Computer Chess}{chapter.1}
+\BOOKMARK [0][-]{chapter.2}{Design}{}
+\BOOKMARK [1][-]{section.2.1}{Board Design}{chapter.2}
+\BOOKMARK [0][-]{chapter.3}{Implementation}{}
+\BOOKMARK [1][-]{section.3.1}{Chess Engine}{chapter.3}
+\BOOKMARK [1][-]{section.3.2}{Graphical User Interface}{chapter.3}
+\BOOKMARK [2][-]{subsection.3.2.1}{Problems encountered with Winboard}{section.3.2}
+\BOOKMARK [1][-]{section.3.3}{Database Model}{chapter.3}
+\BOOKMARK [0][-]{chapter.4}{Evaluation}{}
+\BOOKMARK [0][-]{chapter.5}{Conclusion}{}
+\BOOKMARK [1][-]{section.5.1}{Contributions}{chapter.5}

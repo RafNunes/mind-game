@@ -1,0 +1,11 @@
+This project was evaluated in five key phases, each with different strategies to go along with different the different iterations of the project. These five phases were:
+
+\begin{itemize}
+\item Unit testing of early simple components.
+\item Informal Testing of the rules.
+\item Playing the engine against itself.
+\item Playing from positions.
+\item Formal Evaluation of project.
+\end{itemize}
+
+While implementing the early stages of the chess program it was essential that the most basic components worked. With this in mind two JUnit tests were set-up. The first focused on the piece class, which was explained in the design section

@@ -1,0 +1,43 @@
+\begin{thebibliography}{1}
+
+\bibitem{IBM704}
+Alex Berstein.
+\newblock A chess playing program for the i.b.m 704.
+\newblock {\em Chess Review Magazine}, 26(7), 1958.
+
+\bibitem{NewYork}
+Robert Bryrn.
+\newblock Chess-playing computer closes in on champions.
+\newblock {\em New York Times}, 1989.
+
+\bibitem{Houdini}
+Robert Houdart.
+\newblock Houdini chess engine.
+
+\bibitem{DeepBlue}
+I.B.M.
+\newblock Deep blue.
+
+\bibitem{MuseumMiddle}
+Computer~Chess Museum.
+\newblock Middle game: Computer chess comes of age.
+
+\bibitem{MuseumSearch}
+Computer~Chess Museum.
+\newblock Middle game: Computer chess comes of age: Fast and efficent
+  searching.
+
+\bibitem{MuseumOrigins}
+Computer~Chess Museum.
+\newblock Opening game: Origins of computer chess.
+
+\bibitem{MuseumGoing}
+Computer~Chess Museum.
+\newblock Opening game: Origins of computer chess: Getting going.
+
+\bibitem{ProgrammingPlaying}
+Claude~E. Shannon.
+\newblock Xxii. programming a computer for playing chess.
+\newblock {\em Philosophical Magazine}, 41(314), 1950.
+
+\end{thebibliography}
