@@ -22,12 +22,13 @@ public class XboardUI implements UI {
 			Game.setToEasy();
 		} else if (input.startsWith("setboard")) {
 			String moves = input.substring(9); // After "setboard "
+			moves.split(",");
 			// TODO
-
 		} else if (input.startsWith("sd")) {
 			// TODO
 		} else if (coordinateMovePattern.matcher(input).matches()) {
 			Game.move(input);
+			Game.AIMove();
 		} else {
 			// Do nothing - unsupported functions
 		}

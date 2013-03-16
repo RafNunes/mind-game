@@ -7,7 +7,9 @@ package chess.game;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.List;
 
+import chess.piece.Piece;
 import chess.ui.CommandUI;
 import chess.ui.UI;
 import chess.ui.XboardUI;
@@ -35,6 +37,7 @@ public class Game {
 		// By default, use the command line UI
 		ui = new CommandUI();
 		String input;
+		write("Type help for list of commands");
 		do {
 			try {
 				input = stdin.readLine();
@@ -75,9 +78,8 @@ public class Game {
 
 	}
 
-	public static void move(String input) {
+	public static boolean move(String input) {
 		Move thisMove = null;
-		Move nextMove = null;
 		for (Move move : gameBoard.generateMoves()) {
 			if (move.matches(input)) {
 				thisMove = move;
@@ -85,8 +87,18 @@ public class Game {
 		}
 		if (thisMove != null) {
 			gameBoard.makeMove(thisMove);
-			nextMove = ai.makeMove(gameBoard);
-			write("move " + nextMove.toString().replaceAll("][- ", ""));
+			return true;
 		}
+		return false;
+	}
+
+	public static void AIMove() {
+		Move aiMove = ai.makeMove(gameBoard);
+		gameBoard.makeMove(aiMove);
+		write("move " + aiMove.toString().replaceAll("[\\W]", ""));
+	}
+
+	public static List<Piece> getPieces() {
+		return gameBoard.getPieces();
 	}
 }
