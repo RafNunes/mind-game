@@ -1,0 +1,110 @@
+@startuml img/new-chess-class.png
+
+Class Game {
+- UI ui
+- Board board
+- AI ai
++ run() : void
++ write(String) : void
++ undo() : void
++ setToHard() : void
++ setToEasy() : void 
++ move(String) : Boolean
++ aiMove() : void 
++ getPieces() : List<Piece 
+}
+
+Interface UI {
++ processInput(String) : void
+}
+
+Class XBoard {
+}
+
+Class CommandUI {
+}
+
+Class Board {
+- PieceListNode[] board
+- PieceList whites
+- PieceList blacks
+- Stack<Move> previousMoves
+- byte whiteKingPos
+- byte blackKingPos
++ tryMove(Move) : void
++ makeMove(Move) : void
++ undoMove() : void
++ generateMoves() : List<Move>
++ getPieces() : List<Piece>
+}
+
+Interface AI {
++ makeMove(Board) : Move
+}
+
+Class BasicAI {
+}
+
+Class BestAI {
+}
+
+Abstract Class Piece {
++ Type type
++ Colour colour
++ byte position
++ Boolen hasMoved
++ {abstract} getDirection() : byte[]
+}
+
+Class Pawn {
+}
+
+Abstract Class NonPawn {
+}
+
+Class SlidingPiece {
+}
+
+Class SteppingPiece{
+}
+
+Enum Type {
+PAWN
+ROOK
+KNIGHT
+BISHOP
+QUEEN
+KING
+}
+
+Enum Colour {
+WHITE
+BLACK
+}
+
+Class Move {
++ byte start
++ byte end
++ Type promotion
++ Piece capture
++ Boolean firstMove
++ matches(String) : Boolean
+}
+
+Game - UI
+UI <|-- XBoard
+UI <|-- CommandUI
+Game -- Board
+AI - Game
+AI <|-- BasicAI
+AI <|-- BestAI
+Board *-- "*" Piece
+Board - Move
+Piece -- Colour
+Piece -- Type
+Piece <|-- NonPawn
+Piece <|-- Pawn
+NonPawn <|-- SlidingPiece 
+NonPawn <|-- SteppingPiece 
+
+@enduml

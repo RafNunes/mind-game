@@ -44,7 +44,7 @@ public class CommandUI implements UI {
 	 * 
 	 * @param pieces
 	 */
-	public void displayBoard(List<Piece> pieces) {
+	private void displayBoard(List<Piece> pieces) {
 		String[] board = getBoardRepresentation(pieces);
 		String square = " | ";
 		String edge = "  +---+---+---+---+---+---+---+---+\n";

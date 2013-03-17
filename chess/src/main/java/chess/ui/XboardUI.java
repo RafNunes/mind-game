@@ -26,6 +26,8 @@ public class XboardUI implements UI {
 			// TODO
 		} else if (input.startsWith("sd")) {
 			// TODO
+		} else if (input.equalsIgnoreCase("go")) {
+			Game.AIMove();
 		} else if (coordinateMovePattern.matcher(input).matches()) {
 			Game.move(input);
 			Game.AIMove();
