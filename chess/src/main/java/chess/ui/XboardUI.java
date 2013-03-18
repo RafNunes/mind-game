@@ -2,8 +2,6 @@ package chess.ui;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.regex.Matcher;
@@ -20,13 +18,6 @@ public class XboardUI implements UI {
 
 	public XboardUI() {
 		stdin = new BufferedReader(new InputStreamReader(System.in));
-		try {
-			File f = new File("move.txt");
-			f.createNewFile();
-			w = new BufferedWriter(new FileWriter(f));
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
 		write("feature usermove=1");
 		write("feature option=NAME -button");
 		write("feature done=1");
@@ -39,10 +30,6 @@ public class XboardUI implements UI {
 		do {
 			try {
 				input = stdin.readLine();
-				if (w != null) {
-					w.write(input);
-					w.flush();
-				}
 				if (coordinateMovePattern.matcher(input).matches()) {
 					Matcher matcher = coordinateMovePattern.matcher(input);
 					if (matcher.find())

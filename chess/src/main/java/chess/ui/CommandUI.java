@@ -1,8 +1,13 @@
 package chess.ui;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import chess.game.Game;
 import chess.piece.Piece;
 import chess.util.Colour;
 
@@ -13,31 +18,32 @@ import chess.util.Colour;
  */
 public class CommandUI implements UI {
 
-	private static Pattern coordinateMovePattern = Pattern.compile("[.]*([a-h][1-8][ ]*[a-h][1-8][qrnbQRNB])?");
+	private static Pattern coordinateMovePattern = Pattern.compile(".*([a-h][1-8][\\W]*[a-h][1-8][qrnbQRNB]?)");
+
+	private final BufferedReader stdin;
+
+	public CommandUI() {
+		stdin = new BufferedReader(new InputStreamReader(System.in));
+	}
 
 	@Override
 	public String readInput() {
-		// if (input.equalsIgnoreCase("help")) {
-		// Game.write("new \t new game");
-		// Game.write("go \t force AI to perform next move. Use at the beginning if wish to play black.");
-		// Game.write("a1a2 \tMove coordenates");
-		// } else if (coordinateMovePattern.matcher(input).matches()) {
-		// Matcher m = coordinateMovePattern.matcher(input);
-		// m.find();
-		// if (Game.move(m.group(1))) {
-		// displayBoard(Game.getPieces());
-		// Game.AIMove();
-		// displayBoard(Game.getPieces());
-		// } else {
-		// Game.write("Illegal move");
-		// }
-		// } else if (input.equalsIgnoreCase("go")) {
-		// Game.AIMove();
-		// displayBoard(Game.getPieces());
-		// } else {
-		//
-		// }
-		return null;
+		String input;
+		do {
+			try {
+				input = stdin.readLine();
+				if (coordinateMovePattern.matcher(input).matches()) {
+					System.out.println(input);
+					Matcher matcher = coordinateMovePattern.matcher(input);
+					if (matcher.find())
+						return matcher.group(1);
+				} else if (input.equalsIgnoreCase("go")) {
+					return Game.AI_MOVE;
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} while (true);
 	}
 
 	/**
@@ -45,7 +51,7 @@ public class CommandUI implements UI {
 	 * 
 	 * @param pieces
 	 */
-	private void displayBoard(List<Piece> pieces) {
+	public void displayBoard(List<Piece> pieces) {
 		String[] board = getBoardRepresentation(pieces);
 		String square = " | ";
 		String edge = "  +---+---+---+---+---+---+---+---+\n";
@@ -112,8 +118,8 @@ public class CommandUI implements UI {
 
 	@Override
 	public void write(String move) {
-		// TODO Auto-generated method stub
-
+		System.out.println(move);
+		System.out.flush();
 	}
 
 }

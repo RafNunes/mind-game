@@ -139,9 +139,9 @@ public class Move {
 				return true;
 			} else {
 
-				if (moveInput.charAt(nextMoveCharacterIndex + 3) == 'q' && promotion == Piece.Type.QUEEN)
+				if (moveInput.charAt(nextMoveCharacterIndex + 2) == 'q' && promotion == Piece.Type.QUEEN)
 					return true;
-				if (moveInput.charAt(nextMoveCharacterIndex + 3) == 'n' && promotion == Piece.Type.KNIGHT)
+				if (moveInput.charAt(nextMoveCharacterIndex + 2) == 'n' && promotion == Piece.Type.KNIGHT)
 					return true;
 				else
 					return false;
@@ -159,6 +159,7 @@ public class Move {
 		int endFile07 = endpos & 7;
 		int endRank07 = endpos >> 4;
 
-		return files[startFile07] + (startRank07 + 1) + files[endFile07] + (endRank07 + 1);
+		return files[startFile07] + (startRank07 + 1) + files[endFile07] + (endRank07 + 1)
+				+ (promotion == null ? "" : promotion.toString());
 	}
 }
