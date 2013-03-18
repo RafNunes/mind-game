@@ -63,6 +63,7 @@ public class Game {
 	private static void outputBoard() {
 		if (ui instanceof CommandUI) {
 			((CommandUI) ui).displayBoard(gameBoard.getPieces());
+			ui.write(gameBoard.generateMoves().toString());
 		}
 	}
 
