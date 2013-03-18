@@ -18,6 +18,8 @@ public class XboardUI implements UI {
 
 	private BufferedWriter w;
 
+	private boolean gameStarted = false;
+
 	public XboardUI() {
 		stdin = new BufferedReader(new InputStreamReader(System.in));
 		try {
@@ -45,10 +47,11 @@ public class XboardUI implements UI {
 					w.flush();
 				}
 				if (coordinateMovePattern.matcher(input).matches()) {
+					gameStarted = true;
 					Matcher matcher = coordinateMovePattern.matcher(input);
 					if (matcher.find())
 						return matcher.group(1);
-				} else if (input.equalsIgnoreCase("go")) {
+				} else if (input.equalsIgnoreCase("go") && !gameStarted) {
 					return Game.AI_MOVE;
 				}
 			} catch (IOException e) {
