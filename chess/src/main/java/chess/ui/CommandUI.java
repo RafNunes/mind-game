@@ -1,10 +1,12 @@
 package chess.ui;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import chess.game.Game;
 import chess.piece.Piece;
 import chess.util.Colour;
 
@@ -15,31 +17,29 @@ import chess.util.Colour;
  */
 public class CommandUI implements UI {
 
-	private static Pattern coordinateMovePattern = Pattern.compile("[.]*([a-h][1-8][ ]*[a-h][1-8][qrnbQRNB])?");
+	private static Pattern coordinateMovePattern = Pattern.compile(".*([a-h][1-8][\\W]*[a-h][1-8][qrnbQRNB]?)");
+
+	private final BufferedReader stdin;
+
+	public CommandUI() {
+		stdin = new BufferedReader(new InputStreamReader(System.in));
+	}
 
 	@Override
-	public void processInput(String input) {
-		if (input.equalsIgnoreCase("help")) {
-			Game.write("new \t new game");
-			Game.write("go \t force AI to perform next move. Use at the beginning if wish to play black.");
-			Game.write("a1a2 \tMove coordenates");
-		} else if (coordinateMovePattern.matcher(input).matches()) {
-			Matcher m = coordinateMovePattern.matcher(input);
-			m.find();
-			if (Game.move(m.group(1))) {
-				displayBoard(Game.getPieces());
-				Game.AIMove();
-				displayBoard(Game.getPieces());
-			} else {
-				Game.write("Illegal move");
+	public String readInput() {
+		String input;
+		do {
+			try {
+				input = stdin.readLine();
+				if (coordinateMovePattern.matcher(input).matches()) {
+					Matcher matcher = coordinateMovePattern.matcher(input);
+					if (matcher.find())
+						return matcher.group(1);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-		} else if (input.equalsIgnoreCase("go")) {
-			Game.AIMove();
-			displayBoard(Game.getPieces());
-		} else {
-
-		}
-
+		} while (true);
 	}
 
 	/**
@@ -47,7 +47,7 @@ public class CommandUI implements UI {
 	 * 
 	 * @param pieces
 	 */
-	private void displayBoard(List<Piece> pieces) {
+	public void displayBoard(List<Piece> pieces) {
 		String[] board = getBoardRepresentation(pieces);
 		String square = " | ";
 		String edge = "  +---+---+---+---+---+---+---+---+\n";
@@ -110,6 +110,12 @@ public class CommandUI implements UI {
 		int file07 = piece.getPosition() & 7;
 		int rank07 = piece.getPosition() >> 4;
 		return (8 * rank07) + file07;
+	}
+
+	@Override
+	public void write(String move) {
+		System.out.println(move);
+		System.out.flush();
 	}
 
 }

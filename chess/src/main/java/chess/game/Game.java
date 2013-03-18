@@ -5,22 +5,25 @@
 
 package chess.game;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.List;
-
-import chess.piece.Piece;
 import chess.ui.CommandUI;
 import chess.ui.UI;
 import chess.ui.XboardUI;
 
 public class Game {
 
+	public static final String AI_MOVE = "AI";
+	public static final String COMMAND_LINE = "CL";
+
 	private static UI ui;
 	private static Board gameBoard;
 	private static AI ai;
 
 	public static void main(String[] args) {
+		if (System.getProperty("xboard") != null) {
+			ui = new XboardUI();
+		} else {
+			ui = new CommandUI();
+		}
 		Game.run();
 	}
 
@@ -29,93 +32,39 @@ public class Game {
 	}
 
 	public static void run() {
-		Game.write("feature usermove=1");
-		Game.write("feature option=NAME -button");
-		Game.write("feature done=1");
-		Game.write("st 30");
-		BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+
 		// Create new game and AI engine
 		gameBoard = new Board();
 		ai = new BestAI();
 		// By default, use the xboard UI
-		ui = new XboardUI();
 		String input;
-		write("Type help for list of commands");
+		Move move;
 		do {
-			try {
-				input = stdin.readLine();
-
-				if (input.equalsIgnoreCase("new")) {
-					// Start a new game
-					ai = new BestAI();
-					gameBoard = new Board();
-					break;
-				} else if (input.equalsIgnoreCase("commandline")) {
-					ui = new CommandUI();
-				} else {
-					ui.processInput(input);
+			outputBoard();
+			input = ui.readInput();
+			if (input.equalsIgnoreCase(AI_MOVE)) {
+				move = ai.makeMove(gameBoard);
+				gameBoard.makeMove(move);
+				ui.write("move " + move.toString());
+			} else {
+				for (Move availableMoves : gameBoard.generateMoves()) {
+					if (availableMoves.matches(input)) {
+						gameBoard.makeMove(availableMoves);
+						move = ai.makeMove(gameBoard);
+						gameBoard.makeMove(move);
+						ui.write("move " + move.toString());
+						break;
+					}
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
 		} while (true);
 	}
 
-	/**
-	 * Writes to System.out.
-	 * 
-	 * @param output
-	 *            String to be written.
-	 */
-	public static void write(String output) {
-		System.out.println(output);
-		System.out.flush();
-	}
-
-	/**
-	 * Reverts the board to the last move in the stack.
-	 */
-	public static void undo() {
-		gameBoard.undoMove();
-	}
-
-	public static void setDifficulty(Integer depth) {
-		ai = new BestAI();
-	}
-
-	/**
-	 * Checks if mvoe is legal, then acts it on the board.
-	 * 
-	 * @param input
-	 *            The move to be made
-	 * @return Whether or not the move has been made: true if it has, false
-	 *         otherwise
-	 */
-	public static boolean move(String input) {
-		Move thisMove = null;
-		for (Move move : gameBoard.generateMoves()) {
-			if (move.matches(input)) {
-				thisMove = move;
-			}
+	private static void outputBoard() {
+		if (ui instanceof CommandUI) {
+			((CommandUI) ui).displayBoard(gameBoard.getPieces());
+			ui.write(gameBoard.generateMoves().toString());
 		}
-		if (thisMove != null) {
-			gameBoard.makeMove(thisMove);
-			return true;
-		}
-		return false;
 	}
 
-	/**
-	 * Called to make the AI generate a move and act it upon the board.
-	 */
-	public static void AIMove() {
-		Move aiMove = ai.makeMove(gameBoard);
-		gameBoard.makeMove(aiMove);
-		write("move " + aiMove.toString().replaceAll("[\\W]", ""));
-		Game.write("st 30");
-	}
-
-	public static List<Piece> getPieces() {
-		return gameBoard.getPieces();
-	}
 }

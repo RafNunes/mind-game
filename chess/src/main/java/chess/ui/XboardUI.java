@@ -1,5 +1,8 @@
 package chess.ui;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -8,35 +11,42 @@ import chess.game.Game;
 public class XboardUI implements UI {
 
 	private static Pattern coordinateMovePattern = Pattern.compile(".*([a-h][1-8][\\W]*[a-h][1-8][qrnbQRNB]?)");
+	private final BufferedReader stdin;
+
+	private boolean gameStarted = false;
+
+	public XboardUI() {
+		stdin = new BufferedReader(new InputStreamReader(System.in));
+		write("feature usermove=1");
+		write("feature option=NAME -button");
+		write("feature done=1");
+		write("st 30");
+	}
 
 	@Override
-	public void processInput(String input) {
-		if (input.equals("undo")) {
-			Game.undo();
-			Game.undo();
-		} else if (input.equals("remove")) {
-			Game.undo();
-			Game.undo();
-		} else if (input.equals("hard")) {
-			Game.setDifficulty(5);
-		} else if (input.equals("easy")) {
-			Game.setDifficulty(2);
-		} else if (input.startsWith("setboard")) {
-			String moves = input.substring(9); // After "setboard "
-			moves.split(",");
-			// TODO
-		} else if (input.startsWith("sd")) {
-			// TODO
-		} else if (input.equalsIgnoreCase("go")) {
-			Game.AIMove();
-		} else if (coordinateMovePattern.matcher(input).matches()) {
-			Matcher m = coordinateMovePattern.matcher(input);
-			m.find();
-			Game.move(m.group(1));
-			Game.AIMove();
-		} else {
-			// Do nothing - unsupported functions
-		}
+	public String readInput() {
+		String input;
+		do {
+			try {
+				input = stdin.readLine();
+				if (coordinateMovePattern.matcher(input).matches()) {
+					gameStarted = true;
+					Matcher matcher = coordinateMovePattern.matcher(input);
+					if (matcher.find())
+						return matcher.group(1);
+				} else if (input.equalsIgnoreCase("go") && !gameStarted) {
+					return Game.AI_MOVE;
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} while (true);
+	}
+
+	@Override
+	public void write(String output) {
+		System.out.println(output);
+		System.out.flush();
 	}
 
 }

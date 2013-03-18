@@ -15,7 +15,9 @@ Class Game {
 }
 
 Interface UI {
-+ processInput(String) : void
++ readInput() : String
++ write(String) : void 
+
 }
 
 Class XBoard {
