@@ -12,6 +12,7 @@ public class XboardUI implements UI {
 		Game.write("feature usermove=1");
 		Game.write("feature option=NAME -button");
 		Game.write("feature done=1");
+		Game.write("st 30");
 	}
 
 	@Override
