@@ -125,8 +125,8 @@ public class BestAI implements AI {
 
 	public BestAI() {
 
-		fullDepth = 5;
-		gaugingDepth = 4;
+		fullDepth = Integer.valueOf(System.getProperty("depth", "5"));
+		gaugingDepth = fullDepth - 1;
 		fullDepthWidth = -1;
 		enableQuiescenceCheckDuringGaugeSearch = false;
 		enableQuiescenceCheckDuringFinalSearch = false;
