@@ -8,13 +8,6 @@ public class XboardUI implements UI {
 
 	private static Pattern coordinateMovePattern = Pattern.compile("([a-h][1-8])([a-h][1-8])([qrnbQRNB])?");
 
-	public XboardUI() {
-		Game.write("feature usermove=1");
-		Game.write("feature option=NAME -button");
-		Game.write("feature done=1");
-		Game.write("st 30");
-	}
-
 	@Override
 	public void processInput(String input) {
 		if (input.equals("undo")) {
@@ -38,6 +31,7 @@ public class XboardUI implements UI {
 		} else if (coordinateMovePattern.matcher(input).matches()) {
 			Game.move(input);
 			Game.AIMove();
+			Game.write("st 30");
 		} else {
 			// Do nothing - unsupported functions
 		}

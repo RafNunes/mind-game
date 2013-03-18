@@ -29,8 +29,11 @@ public class Game {
 	}
 
 	public static void run() {
+		Game.write("feature usermove=1");
+		Game.write("feature option=NAME -button");
+		Game.write("feature done=1");
+		Game.write("st 30");
 		BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
-
 		// Create new game and AI engine
 		gameBoard = new Board();
 		ai = new BestAI();
