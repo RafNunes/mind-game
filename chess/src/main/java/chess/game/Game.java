@@ -21,23 +21,19 @@ public class Game {
 	private static AI ai;
 
 	public static void main(String[] args) {
-		Integer difficulty = 5;
-		if (args.length > 0 && args[0].matches("[\\d]*")) {
-			difficulty = Integer.valueOf(args[0]);
-		}
-		Game.run(difficulty);
+		Game.run();
 	}
 
 	public Board getBoard() {
 		return gameBoard;
 	}
 
-	public static void run(Integer depth) {
+	public static void run() {
 		BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 
 		// Create new game and AI engine
 		gameBoard = new Board();
-		ai = new BestAI(depth);
+		ai = new BestAI();
 		// By default, use the command line UI
 		ui = new CommandUI();
 		String input;
@@ -48,7 +44,7 @@ public class Game {
 
 				if (input.equalsIgnoreCase("new")) {
 					// Start a new game
-					ai = new BestAI(depth);
+					ai = new BestAI();
 					gameBoard = new Board();
 					break;
 				} else if (input.equalsIgnoreCase("xboard")) {
@@ -81,7 +77,7 @@ public class Game {
 	}
 
 	public static void setDifficulty(Integer depth) {
-		ai = new BestAI(depth);
+		ai = new BestAI();
 	}
 
 	/**

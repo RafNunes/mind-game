@@ -123,10 +123,10 @@ public class BestAI implements AI {
 	// depending on which of the above are set
 	private boolean quiescenceCheckEnabled;
 
-	public BestAI(Integer depth) {
+	public BestAI() {
 
-		fullDepth = depth;
-		gaugingDepth = depth - 1;
+		fullDepth = 5;
+		gaugingDepth = 4;
 		fullDepthWidth = -1;
 		enableQuiescenceCheckDuringGaugeSearch = false;
 		enableQuiescenceCheckDuringFinalSearch = false;
