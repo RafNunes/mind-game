@@ -41,6 +41,7 @@ public class XboardUI implements UI {
 				input = stdin.readLine();
 				if (w != null) {
 					w.write(input);
+					w.newLine();
 					w.flush();
 				}
 				if (coordinateMovePattern.matcher(input).matches()) {
