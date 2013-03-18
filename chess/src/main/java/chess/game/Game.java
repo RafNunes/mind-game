@@ -19,6 +19,11 @@ public class Game {
 	private static AI ai;
 
 	public static void main(String[] args) {
+		if (System.getProperty("xboard") != null) {
+			ui = new XboardUI();
+		} else {
+			ui = new CommandUI();
+		}
 		Game.run();
 	}
 
@@ -32,25 +37,35 @@ public class Game {
 		gameBoard = new Board();
 		ai = new BestAI();
 		// By default, use the xboard UI
-		ui = new XboardUI();
 		String input;
 		Move move;
 		do {
+			outputBoard();
 			input = ui.readInput();
 			if (input.equalsIgnoreCase(COMMAND_LINE)) {
 				ui = new CommandUI();
-			} else if (!input.equalsIgnoreCase(AI_MOVE)) {
+			} else if (input.equalsIgnoreCase(AI_MOVE)) {
+				move = ai.makeMove(gameBoard);
+				gameBoard.makeMove(move);
+				ui.write("move " + move.toString());
+			} else {
 				for (Move availableMoves : gameBoard.generateMoves()) {
 					if (availableMoves.matches(input)) {
 						gameBoard.makeMove(availableMoves);
+						move = ai.makeMove(gameBoard);
+						gameBoard.makeMove(move);
+						ui.write("move " + move.toString());
 						break;
 					}
 				}
 			}
-			move = ai.makeMove(gameBoard);
-			gameBoard.makeMove(move);
-			ui.write("move " + move.toString());
 		} while (true);
+	}
+
+	private static void outputBoard() {
+		if (ui instanceof CommandUI) {
+			((CommandUI) ui).displayBoard(gameBoard.getPieces());
+		}
 	}
 
 }

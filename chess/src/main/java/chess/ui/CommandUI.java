@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import chess.game.Game;
 import chess.piece.Piece;
 import chess.util.Colour;
 
@@ -36,8 +35,6 @@ public class CommandUI implements UI {
 					Matcher matcher = coordinateMovePattern.matcher(input);
 					if (matcher.find())
 						return matcher.group(1);
-				} else if (input.equalsIgnoreCase("go")) {
-					return Game.AI_MOVE;
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
