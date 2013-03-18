@@ -1,7 +1,10 @@
 package chess.ui;
 
+
 public interface UI {
 
-	public void processInput(String input);
+	public String readInput();
+
+	public void write(String move);
 
 }

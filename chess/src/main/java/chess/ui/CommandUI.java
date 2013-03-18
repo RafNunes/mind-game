@@ -1,10 +1,8 @@
 package chess.ui;
 
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import chess.game.Game;
 import chess.piece.Piece;
 import chess.util.Colour;
 
@@ -18,28 +16,28 @@ public class CommandUI implements UI {
 	private static Pattern coordinateMovePattern = Pattern.compile("[.]*([a-h][1-8][ ]*[a-h][1-8][qrnbQRNB])?");
 
 	@Override
-	public void processInput(String input) {
-		if (input.equalsIgnoreCase("help")) {
-			Game.write("new \t new game");
-			Game.write("go \t force AI to perform next move. Use at the beginning if wish to play black.");
-			Game.write("a1a2 \tMove coordenates");
-		} else if (coordinateMovePattern.matcher(input).matches()) {
-			Matcher m = coordinateMovePattern.matcher(input);
-			m.find();
-			if (Game.move(m.group(1))) {
-				displayBoard(Game.getPieces());
-				Game.AIMove();
-				displayBoard(Game.getPieces());
-			} else {
-				Game.write("Illegal move");
-			}
-		} else if (input.equalsIgnoreCase("go")) {
-			Game.AIMove();
-			displayBoard(Game.getPieces());
-		} else {
-
-		}
-
+	public String readInput() {
+		// if (input.equalsIgnoreCase("help")) {
+		// Game.write("new \t new game");
+		// Game.write("go \t force AI to perform next move. Use at the beginning if wish to play black.");
+		// Game.write("a1a2 \tMove coordenates");
+		// } else if (coordinateMovePattern.matcher(input).matches()) {
+		// Matcher m = coordinateMovePattern.matcher(input);
+		// m.find();
+		// if (Game.move(m.group(1))) {
+		// displayBoard(Game.getPieces());
+		// Game.AIMove();
+		// displayBoard(Game.getPieces());
+		// } else {
+		// Game.write("Illegal move");
+		// }
+		// } else if (input.equalsIgnoreCase("go")) {
+		// Game.AIMove();
+		// displayBoard(Game.getPieces());
+		// } else {
+		//
+		// }
+		return null;
 	}
 
 	/**
@@ -110,6 +108,12 @@ public class CommandUI implements UI {
 		int file07 = piece.getPosition() & 7;
 		int rank07 = piece.getPosition() >> 4;
 		return (8 * rank07) + file07;
+	}
+
+	@Override
+	public void write(String move) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

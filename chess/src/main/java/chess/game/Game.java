@@ -5,16 +5,15 @@
 
 package chess.game;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.List;
 
 import chess.piece.Piece;
-import chess.ui.CommandUI;
 import chess.ui.UI;
 import chess.ui.XboardUI;
 
 public class Game {
+
+	public static final String AI_MOVE = "AI";
 
 	private static UI ui;
 	private static Board gameBoard;
@@ -29,35 +28,25 @@ public class Game {
 	}
 
 	public static void run() {
-		Game.write("feature usermove=1");
-		Game.write("feature option=NAME -button");
-		Game.write("feature done=1");
-		Game.write("st 30");
-		BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+
 		// Create new game and AI engine
 		gameBoard = new Board();
 		ai = new BestAI();
 		// By default, use the xboard UI
 		ui = new XboardUI();
 		String input;
-		write("Type help for list of commands");
+		Move move;
 		do {
-			try {
-				input = stdin.readLine();
-
-				if (input.equalsIgnoreCase("new")) {
-					// Start a new game
-					ai = new BestAI();
-					gameBoard = new Board();
+			input = ui.readInput();
+			for (Move availableMoves : gameBoard.generateMoves()) {
+				if (availableMoves.matches(input)) {
+					gameBoard.makeMove(availableMoves);
 					break;
-				} else if (input.equalsIgnoreCase("commandline")) {
-					ui = new CommandUI();
-				} else {
-					ui.processInput(input);
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
+			move = ai.makeMove(gameBoard);
+			gameBoard.makeMove(move);
+			ui.write(move.toString());
 		} while (true);
 	}
 
