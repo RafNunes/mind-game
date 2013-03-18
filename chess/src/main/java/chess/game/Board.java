@@ -8,6 +8,8 @@ import chess.util.*;
 import java.util.LinkedList;
 
 /**
+ * Board class maintains game state and supports making and undoing moves as well as
+ * generating legal moves from the current position and some other utility methods
  * 
  * @author Demian Till
  * 
@@ -24,8 +26,9 @@ public class Board {
 	private byte whiteKingPos; // so we don't have to search to find kings every time we check for 'check'
 	private byte blackKingPos;
 	private int minorDeveloped = 0; /*useful for keeping queen from moving early */
+	
 	/**
-	 * Constructor
+	 * Constructor - initialises game state, setting up pieces in their starting positions
 	 */
 	public Board() {
 
@@ -66,19 +69,6 @@ public class Board {
 		}
 	}
 
-	/**
-	 * Getters
-	 * 
-	 */
-
-	public PieceListNode[] getBoardArray(){
-		return boardArray;
-	}
-
-	public int getMinorDeveloped(){
-		return minorDeveloped;
-	}
-
 	public byte getBlackKingPos(){
 		return blackKingPos;
 	}
@@ -88,7 +78,7 @@ public class Board {
 	}
 
 	/**
-	 * @return - LinkedList<Piece> containing all of the pieces on the board
+	 * @return - list of all of the pieces on the board
 	 */
 	public LinkedList<Piece> getPieces() {
 
@@ -103,28 +93,26 @@ public class Board {
 		}
 		return pieces;
 	}
-	/*
-	 * Used in AI class
+	
+	/**
+	 * @return - the player whose turn it is
 	 */
 	public Colour getThisPlayer(){
 		return thisPlayer;
 	}
 
+	/**
+	 * @return - list of all of white's pieces on the board
+	 */
 	public PieceList getWhitesList(){
 		return whitesPieceList;
 	}
 
+	/**
+	 * @return - list of all of black's pieces on the board
+	 */
 	public PieceList getBlacksList(){
 		return blacksPieceList;
-	}
-
-	public PieceList getMyList(){
-		if (thisPlayer == Colour.WHITE){
-			return whitesPieceList;
-		}
-		else{
-			return blacksPieceList;
-		}
 	}
 
 	/**
@@ -619,27 +607,19 @@ public class Board {
 
 		return moves;
 	}
-	/**
-	 * Checks whether a position is within the legal space of the 0x88 board.
-	 * 
-	 * @param pos the position to be checked.
-	 * @return boolean true if in the legal range, false otherwise
-	 */
-	public boolean inRange (byte pos){
-		return((pos & 0x88) == 0 && pos < (byte)120);
-	}
 
 	public Colour getOtherPlayer() {
 		return otherPlayer;
 	}
 
-	public void setOtherPlayer(Colour otherPlayer) {
+	private void setOtherPlayer(Colour otherPlayer) {
 		this.otherPlayer = otherPlayer;
 	}
+	
 	/**
-	 * Checks if this side's king can castle on the left.
-	 * @param c
-	 * @return boolean
+	 * Checks king of colour indicated in parameter can castle on the left.
+	 * @param colour of king to be checked
+	 * @return true if possible, otherwise false
 	 */
 	public boolean isLeftCastlePossible(Colour c) {
 
@@ -666,10 +646,11 @@ public class Board {
 		}
 		return false;
 	}
+	
 	/**
-	 * Checks if this side's king cna castle to the right.
-	 * @param c
-	 * @return boolean
+	 * Checks king of colour indicated in parameter can castle on the right.
+	 * @param colour of king to be checked
+	 * @return true if possible, otherwise false
 	 */
 	public boolean isRightCastlePossible(Colour c) {
 
@@ -696,6 +677,7 @@ public class Board {
 		}
 		return false;
 	}
+	
 	/**
 	 * Returns a list of all pieces that are able to move to a particular square.
 	 * @param square

@@ -12,33 +12,18 @@ import chess.util.Colour;
 
 /**
  * 
- * @author Craig Martin, Demian Till
+ * The AI used in the final version of the product
+ * 
+ * @author Demian Till
  * 
  */
-
-/*
- * Fri 8th Craig Martin Change log
- * 
- * Bishop now worth 330 re discussion with David Watt
- * No castling bonus in end game
- * 
- * King defence bumped up. From discussion with David Watt an unprotected King
- * that is under attack could be worth up to a queen
- * By this logic (and the fact the king can have 9 squares round it) each piece
- * defending a king should be worth 1/2 pawn (18th of a queen)
- * and any piece attacking the squares round a king should incur a penalty of
- * 1/2 pawn (1/18 of a queen)
- * 
- * Values for occupying central squares updated to values given from David
- * McKenna
- * 
- * Endgame searches to depth 6, David Watt's suggestion 5/03/13
- */
-
 public class BestAI implements AI {
 
 	// some utility classes:
 
+	/*
+	 * Stores values used in the evaluator for weighting all of the different factors considered
+	 */
 	private class Values {
 
 		public int pawn;
@@ -71,6 +56,9 @@ public class BestAI implements AI {
 		public int bonusForDefendingSquareByKing;
 	}
 
+	/*
+	 * Allows the search method to pass Moves around with their associated estimated values
+	 */
 	private class MoveValuePair {
 		public MoveValuePair(Move m, int v) {
 			move = m;
@@ -123,6 +111,10 @@ public class BestAI implements AI {
 	// depending on which of the above are set
 	private boolean quiescenceCheckEnabled;
 
+	/*
+	 * Constructor - sets all values to be used during searching and evaluating.
+	 * Keeps all such value assignments in the same place.
+	 */
 	public BestAI() {
 
 		fullDepth = Integer.valueOf(System.getProperty("depth", "5"));
@@ -247,12 +239,15 @@ public class BestAI implements AI {
 		return bestPair.move;
 	}
 
-	// returns the best move from the current position from the perspective of
-	// the player whose
-	// turn it is in this position (not necessarily the player that the AI is
-	// representing).
-	// If it finds a move better than the upperBound, it will stop the search
-	// and return that move.
+	/*
+	 * returns the best move from the current position from the perspective of the player whose
+	 * turn it is in this position (not necessarily the player that the AI is representing).
+	 * If it finds a move better than the upperBound, it will stop the search and return that move.
+	 * 
+	 * @param - the board containing the state of the game in which a move must be chosen
+	 * @param - depth of the current position
+	 * @param - upperbound, if we find a better move, we will stop and return that move
+	 */
 	private MoveValuePair getBestMove(Board board, int currentDepth, int upperBound) {
 
 		LinkedList<Move> moves = board.generateMoves();
@@ -351,7 +346,11 @@ public class BestAI implements AI {
 		}
 	}
 
-	// returns only moves that capture non-pawn pieces
+	/*
+	 * @param - list of moves that should be filtered
+	 * 
+	 * @return - provided list filtered leaving only 'dangerous' moves
+	 */
 	private LinkedList<Move> filterDangerousMoves(LinkedList<Move> moves) {
 
 		LinkedList<Move> dangerousMoves = new LinkedList<Move>();
@@ -367,8 +366,16 @@ public class BestAI implements AI {
 		return dangerousMoves;
 	}
 
-	// evaluates the board from the perspective of whoever's turn it is based on
-	// the current state of the board.
+	/*
+	 * evaluates the board from the perspective of whoever's turn it is based 
+	 * on the current state of the board. It takes the list of legal moves from this
+	 * position. This is for efficiency. It is very demanding to compute this, and since
+	 * it is likely it will have been computed anyway before this method is called, it should
+	 * be passed in so that we don't have to generate them again.
+	 * 
+	 * @param - game board
+	 * @param - legal moves from this position
+	 */
 	private int evaluate(Board b, LinkedList<Move> moves) {
 
 		int whitesMaterial = getMaterial(b, Colour.WHITE);
@@ -430,9 +437,10 @@ public class BestAI implements AI {
 		return value;
 	}
 
-	// calculates the net gain/loss resulting from pawn structure from the
-	// perspective of the player whose turn it is.
-	// considers doubled pawns, side pawns, passed pawns and isolated pawns
+	/*
+	 * calculates the net gain/loss resulting from pawn structure from the perspective 
+	 * of the player whose turn it is. considers doubled pawns, side pawns, passed pawns and isolated pawns
+	 */
 	private int evaluatePawnStructure(Board b) {
 
 		// each array has an entry for each column on the board. The entry
@@ -651,6 +659,9 @@ public class BestAI implements AI {
 		return score;
 	}
 
+	/*
+	 * gets value of material for player of colour c
+	 */
 	private int getMaterial(Board b, Colour c) {
 
 		PieceList pieces;
@@ -689,8 +700,10 @@ public class BestAI implements AI {
 		return value;
 	}
 
-	// calculates the net gain/loss resulting from central control from the
-	// perspective of the player whose turn it is
+	/*
+	 * calculates the net gain/loss resulting from central control from the perspective 
+	 * of the player whose turn it is
+	 */
 	private int evaluateCentralControl(Board b) {
 
 		Colour ourColour = b.getThisPlayer();
@@ -746,7 +759,10 @@ public class BestAI implements AI {
 		return value;
 	}
 
-	// For use during early/mid game only
+	/*
+	 * Generates a value based on the safety of the king of colour c.
+	 * For use during early/mid game only
+	 */
 	int evaluateKingSafety(Board b, Colour c) {
 
 		int backRow;
@@ -851,7 +867,10 @@ public class BestAI implements AI {
 		return value;
 	}
 
-	// for use during end game only
+	/*
+	 * generates a value based on the mobility of the king of colour c.
+	 * For use during end game only
+	 */
 	int evaluateKingMobility(Board b, Colour c) {
 
 		byte kingPos;
