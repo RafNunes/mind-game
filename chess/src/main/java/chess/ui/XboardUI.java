@@ -48,7 +48,7 @@ public class XboardUI implements UI {
 					Matcher matcher = coordinateMovePattern.matcher(input);
 					if (matcher.find())
 						return matcher.group(1);
-				} else if (input.equalsIgnoreCase("go") || input.equalsIgnoreCase("force")) {
+				} else if (input.equalsIgnoreCase("go")) {
 					return Game.AI_MOVE;
 				}
 			} catch (IOException e) {
