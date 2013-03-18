@@ -33,7 +33,6 @@ public class CommandUI implements UI {
 			try {
 				input = stdin.readLine();
 				if (coordinateMovePattern.matcher(input).matches()) {
-					System.out.println(input);
 					Matcher matcher = coordinateMovePattern.matcher(input);
 					if (matcher.find())
 						return matcher.group(1);
