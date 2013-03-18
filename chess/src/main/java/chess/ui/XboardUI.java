@@ -21,7 +21,7 @@ public class XboardUI implements UI {
 	public XboardUI() {
 		stdin = new BufferedReader(new InputStreamReader(System.in));
 		try {
-			File f = new File("move1.txt");
+			File f = new File("move2.txt");
 			f.createNewFile();
 			w = new BufferedWriter(new FileWriter(f));
 		} catch (Exception e) {
