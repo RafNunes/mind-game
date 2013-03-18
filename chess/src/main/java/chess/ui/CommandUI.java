@@ -1,6 +1,7 @@
 package chess.ui;
 
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import chess.game.Game;
@@ -14,7 +15,7 @@ import chess.util.Colour;
  */
 public class CommandUI implements UI {
 
-	private static Pattern coordinateMovePattern = Pattern.compile("([a-h][1-8])[ ]*([a-h][1-8])([qrnbQRNB])?");
+	private static Pattern coordinateMovePattern = Pattern.compile("[.]*([a-h][1-8][ ]*[a-h][1-8][qrnbQRNB])?");
 
 	@Override
 	public void processInput(String input) {
@@ -23,7 +24,9 @@ public class CommandUI implements UI {
 			Game.write("go \t force AI to perform next move. Use at the beginning if wish to play black.");
 			Game.write("a1a2 \tMove coordenates");
 		} else if (coordinateMovePattern.matcher(input).matches()) {
-			if (Game.move(input)) {
+			Matcher m = coordinateMovePattern.matcher(input);
+			m.find();
+			if (Game.move(m.group(1))) {
 				displayBoard(Game.getPieces());
 				Game.AIMove();
 				displayBoard(Game.getPieces());
