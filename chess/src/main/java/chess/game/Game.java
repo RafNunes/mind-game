@@ -37,8 +37,8 @@ public class Game {
 		// Create new game and AI engine
 		gameBoard = new Board();
 		ai = new BestAI();
-		// By default, use the command line UI
-		ui = new CommandUI();
+		// By default, use the xboard UI
+		ui = new XboardUI();
 		String input;
 		write("Type help for list of commands");
 		do {
@@ -50,8 +50,8 @@ public class Game {
 					ai = new BestAI();
 					gameBoard = new Board();
 					break;
-				} else if (input.equalsIgnoreCase("xboard")) {
-					ui = new XboardUI();
+				} else if (input.equalsIgnoreCase("commandline")) {
+					ui = new CommandUI();
 				} else {
 					ui.processInput(input);
 				}
@@ -112,6 +112,7 @@ public class Game {
 		Move aiMove = ai.makeMove(gameBoard);
 		gameBoard.makeMove(aiMove);
 		write("move " + aiMove.toString().replaceAll("[\\W]", ""));
+		Game.write("st 30");
 	}
 
 	public static List<Piece> getPieces() {

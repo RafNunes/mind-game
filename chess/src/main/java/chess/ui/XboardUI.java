@@ -1,12 +1,13 @@
 package chess.ui;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import chess.game.Game;
 
 public class XboardUI implements UI {
 
-	private static Pattern coordinateMovePattern = Pattern.compile("([a-h][1-8])([a-h][1-8])([qrnbQRNB])?");
+	private static Pattern coordinateMovePattern = Pattern.compile(".*([a-h][1-8][\\W]*[a-h][1-8][qrnbQRNB]?)");
 
 	@Override
 	public void processInput(String input) {
@@ -29,9 +30,10 @@ public class XboardUI implements UI {
 		} else if (input.equalsIgnoreCase("go")) {
 			Game.AIMove();
 		} else if (coordinateMovePattern.matcher(input).matches()) {
-			Game.move(input);
+			Matcher m = coordinateMovePattern.matcher(input);
+			m.find();
+			Game.move(m.group(1));
 			Game.AIMove();
-			Game.write("st 30");
 		} else {
 			// Do nothing - unsupported functions
 		}
