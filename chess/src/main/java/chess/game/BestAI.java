@@ -123,10 +123,10 @@ public class BestAI implements AI {
 	// depending on which of the above are set
 	private boolean quiescenceCheckEnabled;
 
-	public BestAI() {
+	public BestAI(Integer depth) {
 
-		gaugingDepth = 4;
-		fullDepth = 5;
+		fullDepth = depth;
+		gaugingDepth = depth - 1;
 		fullDepthWidth = -1;
 		enableQuiescenceCheckDuringGaugeSearch = false;
 		enableQuiescenceCheckDuringFinalSearch = false;
@@ -177,6 +177,7 @@ public class BestAI implements AI {
 		currentValues = midGameValues;
 	}
 
+	@Override
 	public Move makeMove(Board board) {
 		LinkedList<Move> moves = board.generateMoves();
 

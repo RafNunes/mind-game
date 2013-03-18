@@ -17,9 +17,9 @@ public class XboardUI implements UI {
 			Game.undo();
 			Game.undo();
 		} else if (input.equals("hard")) {
-			Game.setToHard();
+			Game.setDifficulty(5);
 		} else if (input.equals("easy")) {
-			Game.setToEasy();
+			Game.setDifficulty(2);
 		} else if (input.startsWith("setboard")) {
 			String moves = input.substring(9); // After "setboard "
 			moves.split(",");

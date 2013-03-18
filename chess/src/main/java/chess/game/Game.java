@@ -6,6 +6,9 @@
 package chess.game;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 
@@ -21,19 +24,33 @@ public class Game {
 	private static AI ai;
 
 	public static void main(String[] args) {
-		Game.run();
+		Integer difficulty = 5;
+		if (args.length > 0 && args[0].matches("[\\d]*")) {
+			difficulty = Integer.valueOf(args[0]);
+			try {
+				File test = new File("test.txt");
+				test.createNewFile();
+				FileWriter writer = new FileWriter(test);
+				writer.write(args[0]);
+				writer.flush();
+				writer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		Game.run(difficulty);
 	}
 
 	public Board getBoard() {
 		return gameBoard;
 	}
 
-	public static void run() {
+	public static void run(Integer depth) {
 		BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 
 		// Create new game and AI engine
 		gameBoard = new Board();
-		ai = new BestAI();
+		ai = new BestAI(depth);
 		// By default, use the command line UI
 		ui = new CommandUI();
 		String input;
@@ -42,11 +59,10 @@ public class Game {
 			try {
 				input = stdin.readLine();
 
-				if (input.equals("new")) {
+				if (input.equalsIgnoreCase("new")) {
 					// Start a new game
-					ai = new BestAI();
+					ai = new BestAI(depth);
 					gameBoard = new Board();
-				} else if (input.equals("quit")) {
 					break;
 				} else if (input.equalsIgnoreCase("xboard")) {
 					ui = new XboardUI();
@@ -58,15 +74,18 @@ public class Game {
 			}
 		} while (true);
 	}
+
 	/**
 	 * Writes to System.out.
-	 * @param output String to be written.
+	 * 
+	 * @param output
+	 *            String to be written.
 	 */
 	public static void write(String output) {
 		System.out.println(output);
 		System.out.flush();
 	}
-	
+
 	/**
 	 * Reverts the board to the last move in the stack.
 	 */
@@ -74,19 +93,17 @@ public class Game {
 		gameBoard.undoMove();
 	}
 
-	public static void setToHard() {
-		// TODO Auto-generated method stub
-
+	public static void setDifficulty(Integer depth) {
+		ai = new BestAI(depth);
 	}
 
-	public static void setToEasy() {
-		// TODO Auto-generated method stub
-
-	}
 	/**
 	 * Checks if mvoe is legal, then acts it on the board.
-	 * @param input The move to be made
-	 * @return Whether or not the move has been made: true if it has, false otherwise
+	 * 
+	 * @param input
+	 *            The move to be made
+	 * @return Whether or not the move has been made: true if it has, false
+	 *         otherwise
 	 */
 	public static boolean move(String input) {
 		Move thisMove = null;
@@ -101,6 +118,7 @@ public class Game {
 		}
 		return false;
 	}
+
 	/**
 	 * Called to make the AI generate a move and act it upon the board.
 	 */
