@@ -42,9 +42,7 @@ public class Game {
 		do {
 			outputBoard();
 			input = ui.readInput();
-			if (input.equalsIgnoreCase(COMMAND_LINE)) {
-				ui = new CommandUI();
-			} else if (input.equalsIgnoreCase(AI_MOVE)) {
+			if (input.equalsIgnoreCase(AI_MOVE)) {
 				move = ai.makeMove(gameBoard);
 				gameBoard.makeMove(move);
 				ui.write("move " + move.toString());
