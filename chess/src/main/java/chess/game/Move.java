@@ -1,6 +1,7 @@
 package chess.game;
 
 import chess.piece.Piece;
+import chess.piece.Piece.Type;
 
 /**
  * 
@@ -160,6 +161,6 @@ public class Move {
 		int endRank07 = endpos >> 4;
 
 		return files[startFile07] + (startRank07 + 1) + files[endFile07] + (endRank07 + 1)
-				+ (promotion == null ? "" : promotion.toString());
+				+ (promotion == null ? "" : (promotion == Type.QUEEN ? "q" : "n"));
 	}
 }
