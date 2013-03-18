@@ -11,12 +11,16 @@ public class PieceListIterator implements Iterator<PieceListNode>{
 		
 		this.nextNode = firstNode;
 	}
-
+	/**
+	 * Checks to see whether there are any more pieces in the list.
+	 */
 	public boolean hasNext() {
 		
 		return nextNode != null;
 	}
-	
+	/**
+	 * Returns the next Piece in the list.
+	 */
 	public PieceListNode next() {
 		
 		PieceListNode rtn = nextNode;

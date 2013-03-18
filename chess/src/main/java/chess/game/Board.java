@@ -600,7 +600,11 @@ public class Board {
 
 		return moves;
 	}
-
+	/**
+	 * Generates the moves the opponent could make if it was their turn.
+	 * 
+	 * @return the list of moves the opponent could make
+	 */
 	public LinkedList<Move> generateMovesFromOpponentsPerspective() {
 
 		Colour temp = thisPlayer;
@@ -615,7 +619,12 @@ public class Board {
 
 		return moves;
 	}
-
+	/**
+	 * Checks whether a position is within the legal space of the 0x88 board.
+	 * 
+	 * @param pos the position to be checked.
+	 * @return boolean true if in the legal range, false otherwise
+	 */
 	public boolean inRange (byte pos){
 		return((pos & 0x88) == 0 && pos < (byte)120);
 	}
@@ -627,7 +636,11 @@ public class Board {
 	public void setOtherPlayer(Colour otherPlayer) {
 		this.otherPlayer = otherPlayer;
 	}
-
+	/**
+	 * Checks if this side's king can castle on the left.
+	 * @param c
+	 * @return boolean
+	 */
 	public boolean isLeftCastlePossible(Colour c) {
 
 		byte kingPos;
@@ -653,7 +666,11 @@ public class Board {
 		}
 		return false;
 	}
-
+	/**
+	 * Checks if this side's king cna castle to the right.
+	 * @param c
+	 * @return boolean
+	 */
 	public boolean isRightCastlePossible(Colour c) {
 
 		byte kingPos;
@@ -679,7 +696,11 @@ public class Board {
 		}
 		return false;
 	}
-
+	/**
+	 * Returns a list of all pieces that are able to move to a particular square.
+	 * @param square
+	 * @return A list of pieces.
+	 */
 	public LinkedList<Piece> getPiecesAttackingSquare(byte square) {
 
 		LinkedList<Piece> attackingPieces = new LinkedList<Piece>();
@@ -781,7 +802,11 @@ public class Board {
 
 		return attackingPieces;
 	}
-
+	/**
+	 * Returns the piece on the indicated square.
+	 * @param square
+	 * @return The piece if one is found, null otherwise.
+	 */
 	Piece getPieceAt(byte square) {
 			if(boardArray[square] != null) {
 

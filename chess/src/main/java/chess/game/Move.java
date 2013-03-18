@@ -108,7 +108,11 @@ public class Move {
 		
 		this.promotedPawn = promotedPawn;
 	}
-	
+	/**
+	 * Checks to see if the current instance of move matches the input move.
+	 * @param moveInput the move that will be compared to this move
+	 * @return true if moves match, false otherwise
+	 */
 	public boolean matches(String moveInput) {
 		
 		int startFile07 = Character.getNumericValue(moveInput.charAt(0)) - Character.getNumericValue('a');

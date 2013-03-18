@@ -58,12 +58,18 @@ public class Game {
 			}
 		} while (true);
 	}
-
+	/**
+	 * Writes to System.out.
+	 * @param output String to be written.
+	 */
 	public static void write(String output) {
 		System.out.println(output);
 		System.out.flush();
 	}
-
+	
+	/**
+	 * Reverts the board to the last move in the stack.
+	 */
 	public static void undo() {
 		gameBoard.undoMove();
 	}
@@ -77,7 +83,11 @@ public class Game {
 		// TODO Auto-generated method stub
 
 	}
-
+	/**
+	 * Checks if mvoe is legal, then acts it on the board.
+	 * @param input The move to be made
+	 * @return Whether or not the move has been made: true if it has, false otherwise
+	 */
 	public static boolean move(String input) {
 		Move thisMove = null;
 		for (Move move : gameBoard.generateMoves()) {
@@ -91,7 +101,9 @@ public class Game {
 		}
 		return false;
 	}
-
+	/**
+	 * Called to make the AI generate a move and act it upon the board.
+	 */
 	public static void AIMove() {
 		Move aiMove = ai.makeMove(gameBoard);
 		gameBoard.makeMove(aiMove);

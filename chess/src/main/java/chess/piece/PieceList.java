@@ -13,7 +13,10 @@ public class PieceList implements Iterable<PieceListNode>{
 		head = new PieceListNode();
 	}
 	
-	// makes a node with the provided piece and adds it to the list
+	/**
+	 *  makes a node with the provided piece and adds it to the list
+	 * @param piece
+	 */
 	public void addPiece(Piece piece) {
 		
 		PieceListNode newNode = new PieceListNode(piece);
@@ -22,7 +25,10 @@ public class PieceList implements Iterable<PieceListNode>{
 		head.setNext(newNode);
 		newNode.setPrevious(head);
 	}
-	
+	/**
+	 * Adds a premade node to the list.
+	 * @param newNode
+	 */
 	public void addNode(PieceListNode newNode) {
 		
 		newNode.setNext(head.getNext());

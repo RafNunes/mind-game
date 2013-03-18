@@ -9,7 +9,9 @@ public class PieceListNode {
 	private PieceListNode next;
 	private Piece piece;
 
-	
+	/**
+	 * Removes the specified node from the list.
+	 */
 	public void detachSelfFromList() {
 		
 		previous.setNext(next);
