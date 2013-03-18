@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import chess.game.Game;
+
 public class XboardUI implements UI {
 
 	private static Pattern coordinateMovePattern = Pattern.compile(".*([a-h][1-8][\\W]*[a-h][1-8][qrnbQRNB]?)");
@@ -29,6 +31,8 @@ public class XboardUI implements UI {
 					Matcher matcher = coordinateMovePattern.matcher(input);
 					if (matcher.find())
 						return matcher.group(1);
+				} else if (input.equalsIgnoreCase("go")) {
+					return Game.AI_MOVE;
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
