@@ -8,6 +8,12 @@ public class XboardUI implements UI {
 
 	private static Pattern coordinateMovePattern = Pattern.compile("([a-h][1-8])([a-h][1-8])([qrnbQRNB])?");
 
+	public XboardUI() {
+		Game.write("feature usermove=1");
+		Game.write("feature option=NAME -button");
+		Game.write("feature done=1");
+	}
+
 	@Override
 	public void processInput(String input) {
 		if (input.equals("undo")) {
